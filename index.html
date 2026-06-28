@@ -28,7 +28,7 @@
     overflow:hidden; user-select:none; -webkit-user-select:none;
   }
   #app{ position:relative; height:100vh; height:100dvh; max-width:460px; margin:0 auto;
-    display:flex; flex-direction:column; padding:8px 5px calc(7px + env(safe-area-inset-bottom)); }
+    display:flex; flex-direction:column; padding:8px 4px calc(7px + env(safe-area-inset-bottom)); }
 
   /* ---------- TITLE ---------- */
   #title{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:15px; padding:24px 22px; text-align:center; }
@@ -62,18 +62,27 @@
   .menuBtn:active{ transform:translateY(2px); box-shadow:0 0 0 #150d06; }
   .hudTop{ display:flex; align-items:center; gap:9px; padding-right:34px; }
   .stage-name{ font-size:13px; font-weight:700; letter-spacing:.2px; white-space:nowrap; }
+  .stageRow{ display:flex; gap:5px; margin-top:6px; }
+  .stageChip{ flex:1; padding:5px 4px; border-radius:7px; border:1px solid var(--panel-edge); background:linear-gradient(180deg,#241a11,#160f08);
+    color:var(--muted); font-size:10.5px; font-weight:600; cursor:pointer; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:background .12s,color .12s,border-color .12s; }
+  .stageChip.active{ background:linear-gradient(180deg,#7a5a2a,#5a3f1c); color:#ffe9c0; border-color:#9a7438; box-shadow:0 0 6px rgba(180,130,60,.3); }
   .hpmini{ font-size:12px; color:#ffd2d8; font-variant-numeric:tabular-nums; } .hpmini .hh{ color:#ff8a98; font-weight:700; }
   .turn{ font-size:12px; color:var(--muted); margin-left:auto; } .turn b{ color:var(--ink); font-variant-numeric:tabular-nums; }
   .qpill{ font-size:11px; font-weight:800; padding:2px 9px; border-radius:999px; border:1px solid var(--panel-edge); white-space:nowrap; background:#170f07; letter-spacing:.3px; }
   .qpill.qa{ color:var(--qa); border-color:rgba(255,213,107,.5); box-shadow:0 0 8px rgba(255,213,107,.25); }
   .qpill.qb{ color:var(--qb); } .qpill.qc{ color:var(--qc); border-color:rgba(207,148,102,.5); }
+  .noisepill{ font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; border:1px solid rgba(200,150,80,.5); white-space:nowrap; background:#170f07; color:#e6bd80; letter-spacing:.3px; }
   .goalRow{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:#cdd3ea; }
   .goalRow .gi{ width:14px; height:14px; flex:none; position:relative; }
   .gi .leafmini{ position:absolute; inset:0; background:linear-gradient(150deg,#a9f0c2,#5fc585); border-radius:0 60% 0 60%; transform:rotate(45deg); box-shadow:0 0 6px rgba(127,230,160,.6); }
   .gi.collected::after{ content:"✓"; position:absolute; right:-4px; bottom:-4px; font-size:10px; color:#1f2a22; background:var(--accent); border-radius:50%; width:11px; height:11px; line-height:11px; text-align:center; font-weight:900; }
 
   /* board + frame */
-  #boardWrap{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; perspective:950px; perspective-origin:50% 38%; }
+  #boardWrap{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; perspective:950px; perspective-origin:50% 38%; position:relative; }
+  #boardWrap::before{ content:""; position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:114%; height:86%; z-index:-1; pointer-events:none;
+    background:radial-gradient(ellipse 58% 52% at 50% 55%, rgba(100,68,40,.4), rgba(46,30,17,.14) 46%, transparent 70%); }
+  #boardWrap::after{ content:""; position:absolute; left:50%; bottom:10%; transform:translateX(-50%); width:76%; height:5%; z-index:-1; pointer-events:none;
+    background:radial-gradient(ellipse 50% 100% at 50% 50%, rgba(0,0,0,.52), transparent 66%); filter:blur(2px); }
   #frame{ position:relative; display:inline-block; padding:9px; border-radius:18px;
     transform:rotateX(6deg); transform-origin:50% 58%;
     background:linear-gradient(180deg, var(--rim-top) 0%, var(--rim-mid) 46%, var(--rim-bot) 100%);
@@ -99,6 +108,55 @@
   .cell.floor::after{ content:""; position:absolute; inset:1px; border-radius:3px;
     background:linear-gradient(158deg, rgba(255,236,200,.07) 0%, transparent 40%, rgba(0,0,0,.12) 100%);
     box-shadow:inset 0 1px 1px rgba(255,225,180,.06), inset 0 -2px 3px rgba(0,0,0,.20); }
+  /* 소리 타일 — 밟으면 바스락. 위험/보상처럼 튀지 않는 마른 잎 바닥 */
+  .cell.sound::before{ content:""; position:absolute; inset:2px; border-radius:4px; z-index:0;
+    background:radial-gradient(78% 70% at 50% 62%, rgba(168,120,58,.26), rgba(120,84,40,.10) 60%, transparent 80%);
+    box-shadow:inset 0 0 0 1px rgba(180,135,70,.16); }
+  .soundArt{ position:absolute; inset:0; z-index:1; pointer-events:none; }
+  .soundArt i{ position:absolute; width:25%; height:19%; border-radius:62% 30% 62% 30%; opacity:.72;
+    background:linear-gradient(135deg,#b98b4c,#8a6230); box-shadow:inset 0 1px 1px rgba(255,222,165,.28); }
+  .soundArt i:nth-child(1){ left:17%; top:30%; transform:rotate(-20deg); }
+  .soundArt i:nth-child(2){ left:48%; top:50%; transform:rotate(22deg); background:linear-gradient(135deg,#c89a55,#996d37); }
+  .soundArt i:nth-child(3){ left:30%; top:60%; transform:rotate(6deg); width:21%; height:16%; opacity:.62; }
+  .cell.sound.ripple .soundArt{ animation:soundpop .5s ease; }
+  @keyframes soundpop{ 0%{transform:scale(.9)} 45%{transform:scale(1.12)} 100%{transform:scale(1)} }
+  /* 밀 수 있는 돌 — 고정 바위와 달리 둥글고 작고 밝아 '밀 수 있을 것 같은' 느낌 */
+  .crate .inner{ position:absolute; inset:0; }
+  .cshadow{ position:absolute; left:26%; bottom:13%; width:48%; height:15%; border-radius:50%; z-index:1;
+    background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.42), transparent 74%); }
+  .crock{ position:absolute; left:23%; top:22%; width:54%; height:52%; z-index:2;
+    border-radius:48% 52% 50% 50% / 54% 50% 50% 46%;
+    background:radial-gradient(40% 34% at 38% 30%, #d8c39c 0%, #b59a72 48%, #927a58 100%);
+    box-shadow:inset 0 2px 3px rgba(255,245,220,.5), inset 0 -4px 5px rgba(0,0,0,.28), 0 3px 5px rgba(0,0,0,.34);
+    border:1px solid rgba(232,214,176,.45); }
+  .crock::after{ content:""; position:absolute; left:24%; top:18%; width:30%; height:22%; border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, rgba(255,248,228,.62), transparent 72%); }
+  .crate.nudge-c .crock{ animation:nudge .35s ease; }
+  /* 순찰 몬스터 — 말랑 박쥐 (슬라임과 달리 떠 있고 날개가 있는 순찰자) */
+  .patrol .inner{ position:absolute; inset:0; }
+  .bshadow{ position:absolute; left:30%; bottom:11%; width:40%; height:11%; border-radius:50%; z-index:1;
+    background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.42), transparent 75%); animation:batshadow 1.7s ease-in-out infinite; }
+  .bat{ position:absolute; left:24%; top:22%; width:52%; height:48%; z-index:3; animation:batfloat 1.7s ease-in-out infinite; }
+  .bat-body{ position:absolute; left:24%; top:12%; width:52%; height:72%; border-radius:50% 50% 48% 48%; z-index:2;
+    background:radial-gradient(42% 36% at 42% 28%, #8a7bb2, #5f5286 55%, #423861);
+    box-shadow:inset 0 -3px 4px rgba(0,0,0,.32), inset 0 2px 2px rgba(225,215,250,.32); }
+  .bat-body .be{ position:absolute; top:30%; width:17%; height:17%; background:#ffe9a8; border-radius:50%; box-shadow:0 0 3px rgba(0,0,0,.45); }
+  .bat-body .be.l{ left:27%; } .bat-body .be.r{ right:27%; }
+  .bat-body::after{ content:""; position:absolute; left:42%; top:52%; width:16%; height:9%; border-radius:50%; background:rgba(40,30,60,.5); }
+  .wing{ position:absolute; top:22%; width:33%; height:40%; z-index:1;
+    background:linear-gradient(135deg,#6a5d92,#473c66); }
+  .wing.l{ left:-5%; border-radius:70% 30% 50% 60%; transform-origin:right center; animation:flapL .55s ease-in-out infinite; }
+  .wing.r{ right:-5%; border-radius:30% 70% 60% 50%; transform-origin:left center; animation:flapR .55s ease-in-out infinite; }
+  .patrol.face-left .bat-body{ transform:scaleX(-1); }
+  .patrol.nudge-b .inner{ animation:nudge .3s ease; }
+  @keyframes batfloat{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9%)} }
+  @keyframes batshadow{ 0%,100%{transform:scaleX(1); opacity:.42} 50%{transform:scaleX(.82); opacity:.28} }
+  @keyframes flapL{ 0%,100%{transform:rotate(-10deg) scaleY(1)} 50%{transform:rotate(-30deg) scaleY(.78)} }
+  @keyframes flapR{ 0%,100%{transform:rotate(10deg) scaleY(1)} 50%{transform:rotate(30deg) scaleY(.78)} }
+  .mk.patrolnext{ z-index:6; }
+  .pdot{ position:absolute; left:50%; top:50%; width:38%; height:38%; transform:translate(-50%,-50%);
+    border:2px dashed rgba(190,172,238,.75); border-radius:50%; animation:pdotpulse 1.2s ease-in-out infinite; }
+  @keyframes pdotpulse{ 0%,100%{opacity:.5; transform:translate(-50%,-50%) scale(.82)} 50%{opacity:.95; transform:translate(-50%,-50%) scale(1.06)} }
 
   .rockArt{ position:absolute; left:14%; bottom:14%; width:72%; height:66%; z-index:2;
     border-radius:48% 52% 46% 54% / 56% 54% 46% 44%;
@@ -159,9 +217,9 @@
   .actor .glow{ position:absolute; left:8%; bottom:6%; width:84%; height:46%; background:radial-gradient(50% 100% at 50% 100%, rgba(255,236,170,.5), transparent 70%); z-index:0; }
   .actor .inner{ position:absolute; inset:0; z-index:1; }
   .fig{ position:absolute; inset:0; }
-  #player .fig{ transform:scale(1.35); transform-origin:50% 88%; }
-  #slime .fig{ transform:scale(1.30); transform-origin:50% 82%; }
-  .gshadow{ position:absolute; left:15%; bottom:4%; width:70%; height:17%; background:radial-gradient(50% 100% at 50% 50%, rgba(0,0,0,.66), transparent 68%); }
+  #player .fig{ transform:scale(1.40); transform-origin:50% 89%; }
+  #slime .fig{ transform:scale(1.36); transform-origin:50% 83%; }
+  .gshadow{ position:absolute; left:14%; bottom:4%; width:72%; height:17%; background:radial-gradient(50% 100% at 50% 50%, rgba(0,0,0,.68), transparent 67%); }
   .rise{ position:absolute; inset:0; animation:bob 2.4s ease-in-out infinite; }
   @keyframes bob{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6%)} }
   /* ===== 견습 연금술사 피규어 ===== */
@@ -236,6 +294,7 @@
   .zzz span:nth-child(3){ right:52%; top:0;   font-size:13px; animation-delay:1.2s; }
   @keyframes zfloat{ 0%{opacity:0; transform:translateY(5px)} 35%{opacity:1} 100%{opacity:0; transform:translateY(-7px)} }
   .wake{ position:absolute; z-index:8; font-weight:900; font-size:16px; color:#ffd24a; pointer-events:none; text-shadow:0 2px 3px #000; animation:rise-fade .8s ease forwards; }
+  .noise{ position:absolute; z-index:9; font-weight:800; font-size:13px; color:#e6bd80; pointer-events:none; text-shadow:0 2px 3px #000; animation:rise-fade .8s ease forwards; }
 
   /* ---- stunned (기절: 죽지 않고 납작하게 뻗어 칸을 막음, 4턴 뒤 회복) ---- */
   .sl-body{ transition:transform .26s cubic-bezier(.34,1.3,.5,1), filter .26s ease; }
@@ -317,6 +376,41 @@
   .menuItem.close:active{ box-shadow:0 1px 0 #3f7d2c; }
   .menuHelp{ display:none; font-size:11.5px; color:var(--muted); line-height:1.55; padding:8px 10px; background:#170f07; border-radius:9px; border:1px solid var(--panel-edge); }
   .menuHelp.on{ display:block; }
+  /* ===== 퍼즐 씨앗 장부 ===== */
+  .menuItem.ledger{ background:linear-gradient(180deg,#2e3a22,#1c2613); border-color:rgba(140,194,95,.4); color:#cfe6b8; box-shadow:0 3px 0 #131c0c; }
+  .menuItem.ledger:active{ transform:translateY(2px); box-shadow:0 1px 0 #131c0c; }
+  #ledgerPop{ position:absolute; inset:0; display:none; flex-direction:column; background:rgba(8,6,4,.86); backdrop-filter:blur(3px); z-index:36; padding:12px 10px calc(12px + env(safe-area-inset-bottom)); }
+  #ledgerPop.on{ display:flex; }
+  .ledgerCard{ flex:1; min-height:0; display:flex; flex-direction:column; background:linear-gradient(180deg,#241b12,#17100a); border:1px solid var(--panel-edge); border-radius:16px; overflow:hidden; box-shadow:0 18px 44px rgba(0,0,0,.6); }
+  .ledgerHead{ display:flex; align-items:center; justify-content:space-between; padding:12px 13px 6px; }
+  .ledgerTitle{ font-size:15px; font-weight:800; color:#e9dcc4; letter-spacing:.3px; display:flex; align-items:center; gap:8px; }
+  .lSprout{ width:15px; height:16px; position:relative; display:inline-block; }
+  .lSprout::before{ content:""; position:absolute; left:44%; bottom:0; width:11%; height:62%; background:#6c9a48; border-radius:2px; }
+  .lSprout::after{ content:""; position:absolute; left:14%; top:4%; width:42%; height:44%; background:radial-gradient(circle at 70% 72%, #8fd06a, #5a9a3e); border-radius:82% 8% 82% 8%; transform:rotate(-14deg); box-shadow:9px 1px 0 -1px #5a9a3e; }
+  .ledgerClose{ appearance:none; cursor:pointer; touch-action:manipulation; font-size:13px; font-weight:700; color:#16240f; padding:7px 14px; border-radius:10px; border:none;
+    background:linear-gradient(180deg,#9be87e,#6cc24f); box-shadow:0 3px 0 #3f7d2c; }
+  .ledgerClose:active{ transform:translateY(2px); box-shadow:0 1px 0 #3f7d2c; }
+  .ledgerSub{ font-size:11px; color:var(--faint); padding:0 13px 8px; }
+  .ledgerFilters{ display:flex; flex-wrap:wrap; gap:6px; padding:0 11px 9px; border-bottom:1px solid rgba(255,225,180,.08); }
+  .lfChip{ appearance:none; cursor:pointer; touch-action:manipulation; font-size:11px; font-weight:600; color:var(--muted); padding:5px 10px; border-radius:999px;
+    background:#1e1509; border:1px solid var(--panel-edge); white-space:nowrap; }
+  .lfChip.on{ color:#16240f; background:linear-gradient(180deg,#e8d5a0,#cdb06a); border-color:transparent; font-weight:700; }
+  .ledgerList{ flex:1; min-height:0; overflow-y:auto; padding:11px 11px; display:flex; flex-direction:column; gap:9px; -webkit-overflow-scrolling:touch; }
+  .seedCard{ background:linear-gradient(180deg,#2a2014,#1d150c); border:1px solid var(--panel-edge); border-radius:12px; padding:10px 12px; border-left:3px solid var(--sc,#888); }
+  .scTop{ display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+  .scPri{ font-size:10px; font-weight:800; color:#7a6a52; font-variant-numeric:tabular-nums; min-width:16px; }
+  .scName{ font-size:14px; font-weight:800; color:#f0e6d2; flex:1; }
+  .scBadge{ font-size:9.5px; font-weight:800; padding:2px 8px; border-radius:999px; white-space:nowrap; color:#16110a; }
+  .scMeta{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:7px; }
+  .scTag{ font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:6px; background:#170f07; color:var(--muted); border:1px solid var(--panel-edge); }
+  .scTag b{ color:#cdd3ea; font-weight:700; }
+  .scFun{ font-size:12px; color:#e8ddc8; line-height:1.42; margin-bottom:6px; }
+  .scRows{ display:flex; flex-direction:column; gap:3px; }
+  .scRow{ font-size:10.5px; color:var(--muted); line-height:1.45; }
+  .scRow b{ color:#b0a489; font-weight:700; }
+  .ledgerSummary{ padding:11px 14px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid rgba(255,225,180,.1); background:#19110a; }
+  .lsTitle{ font-size:11px; font-weight:800; color:#cdb06a; margin-bottom:4px; letter-spacing:.3px; }
+  .ledgerSummary p{ margin:0; font-size:11px; color:var(--muted); line-height:1.55; } .ledgerSummary b{ color:#e0d6c2; }
 
   /* overlay / result */
   #overlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(8,10,16,.74); backdrop-filter:blur(3px); z-index:20; padding:24px; }
@@ -367,15 +461,17 @@
     <div class="hud">
       <button class="menuBtn" id="menuBtn" aria-label="메뉴">⚙</button>
       <div class="hudTop">
-        <span class="stage-name" id="stageName">1층 · 8×10</span>
+        <span class="stage-name" id="stageName">1층 · 7×9 표준판</span>
         <span class="hpmini">HP <b class="hh" id="hpNow">10</b>/<span id="hpMax">10</span></span>
         <span class="turn">턴 <b id="turnNum">0</b></span>
         <span class="qpill qa" id="qPill">A</span>
+        <span class="noisepill" id="noisePill" style="display:none">소리 0</span>
       </div>
       <div class="goalRow">
         <span class="gi" id="goalIcon"><span class="leafmini"></span></span>
         <span id="goalState">목표: 반짝잎 채집</span>
       </div>
+      <div class="stageRow" id="stageRow"></div>
     </div>
 
     <div class="log" id="log"><p>　</p><p>　</p><p class="last">　</p></div>
@@ -392,6 +488,14 @@
               <span class="sp a"></span><span class="sp b"></span><span class="sp c"></span>
             </div>
           </div></div>
+          <div class="actor crate" id="crate" style="display:none">
+            <div class="inner"><div class="cshadow"></div><div class="crock"></div></div>
+          </div>
+          <div class="actor patrol" id="patrol" style="display:none">
+            <div class="inner"><div class="bshadow"></div>
+              <div class="bat"><span class="wing l"></span><span class="wing r"></span><span class="bat-body"><i class="be l"></i><i class="be r"></i></span></div>
+            </div>
+          </div>
           <div class="actor" id="slime">
             <div class="inner">
               <div class="gshadow"></div>
@@ -439,7 +543,25 @@
         <button class="menuItem" id="mHome">처음으로</button>
         <button class="menuItem" id="mHelp">조작 안내</button>
         <div class="menuHelp" id="menuHelp">방향 패드(▲◀▶▼)로 이동·채집·밀치기·귀환을 모두 해. 한 번 누르면 한 턴, 막힌 방향은 턴이 지나지 않아. 보드의 칸을 직접 탭해도 같은 조작이 돼.</div>
+        <button class="menuItem ledger" id="mLedger">퍼즐 씨앗 장부</button>
         <button class="menuItem close" id="mClose">닫기</button>
+      </div>
+    </div>
+
+    <div id="ledgerPop">
+      <div class="ledgerCard">
+        <div class="ledgerHead">
+          <div class="ledgerTitle"><span class="lSprout"></span> 퍼즐 씨앗 장부</div>
+          <button class="ledgerClose" id="lClose">닫기</button>
+        </div>
+        <div class="ledgerSub">R&amp;D 기록장 · 구현 전 아이디어 보관소</div>
+        <div class="ledgerFilters" id="ledgerFilters"></div>
+        <div class="ledgerList" id="ledgerList"></div>
+        <div class="ledgerSummary">
+          <div class="lsTitle">R&amp;D 요약 · 이관 메모</div>
+          <p>기본 표준판은 <b>7×9</b>, 8×10은 확장판. 핵심 재미는 <b>좋은 재료를 조용히 가져오는 것</b>. 몬스터를 잡지 않고 피하고 막는다.</p>
+          <p style="margin-top:6px;"><b>10</b>: 기존 기믹으로 7×9 <b>스테이지 3종</b> 구성 — 조용한 반짝잎 / 박쥐 길목 / 바스락 수습로. 새 기믹을 더하는 대신 <b>기믹이 필요한 상황</b>을 만들어 레벨에 의미를 부여. 다음 후보: <b>소리 기상 재실험 → 재료별 특성</b>.</p>
+        </div>
       </div>
     </div>
 
@@ -465,23 +587,31 @@
 
 /* ---------- stages: '.' floor 'O' rock  P start  E slime  L leaf  S exit(가게문) ---------- */
 const STAGES = {
-  "7x9": {
-    cols:7, rows:9, name:"7×9 튜토리얼판", tag:"조작·규칙 익히는 도입판", ambush:false,
-    map:[ ".......",".PS....",".......","...O...","..O.E..",".......","....O..",".....L.","......." ]
+  s1: {
+    cols:7, rows:9, name:"조용한 반짝잎", tag:"Stage 1", hint:"바스락 길은 빠르지만 품질이 떨어진다.", ambush:true,
+    map:[ ".PS....", "...~...", "....O..", ".......", "E......", "...~...", "....O..", ".......", ".L...." ]
+  },
+  s2: {
+    cols:7, rows:9, name:"박쥐 길목", tag:"Stage 2", hint:"돌을 밀면 박쥐의 길을 막을 수 있다.", ambush:true,
+    map:[ "..PS..E", ".......", ".......", ".......", ".......", "...X...", "OOMMMOO", ".......", "..L...." ]
+  },
+  s3: {
+    cols:7, rows:9, name:"바스락 수습로", tag:"Stage 3", hint:"빠른 길은 시끄럽지만, 돌과 타이밍으로 만회할 수 있다.", ambush:true,
+    map:[ "..PS...", ".......", ".....~.", ".......", "E......", "...X...", "OOMMMOO", ".......", "..L...." ]
   },
   "8x10": {
-    cols:8, rows:10, name:"8×10 표준판", tag:"잠복 슬라임 · 조용한 길 찾기", ambush:true,
+    cols:8, rows:10, name:"8×10 확장판", tag:"확장판", hint:"", ambush:true,
     map:[ "........",".PS.....","........","..O.....","....E...","........","..O...O.","........",".....L..","........" ]
   }
 };
 
 let S=null, tile=44, busy=false, logLines=[];
 const $ = id => document.getElementById(id);
-const boardEl=$("board"), markersEl=$("markers"), playerEl=$("player"), slimeEl=$("slime"), leafEl=$("leaf");
+const boardEl=$("board"), markersEl=$("markers"), playerEl=$("player"), slimeEl=$("slime"), leafEl=$("leaf"), crateEl=$("crate"), patrolEl=$("patrol");
 
 (function(){
   const wrap=$("sizes");
-  for(const key of ["7x9","8x10"]){
+  for(const key of ["s1","s2","s3","8x10"]){
     const st=STAGES[key];
     const b=document.createElement("button"); b.className="sizeBtn";
     b.innerHTML='<span class="big">'+st.name+'</span><span class="tag">'+st.tag+'</span>';
@@ -491,27 +621,31 @@ const boardEl=$("board"), markersEl=$("markers"), playerEl=$("player"), slimeEl=
 })();
 
 function parseStage(def){
-  const terrain=[]; let player=null, slime=null, leaf=null, exit=null;
+  const terrain=[]; let player=null, slime=null, leaf=null, exit=null, crate=null, patrol=[];
   for(let r=0;r<def.rows;r++){
     const line=def.map[r], row=[];
     for(let c=0;c<def.cols;c++){
       const ch=line[c];
       if(ch==="O") row.push("rock");
       else if(ch==="S"){ row.push("exit"); exit={c,r}; }
-      else { row.push("floor"); if(ch==="P") player={c,r}; if(ch==="E") slime={c,r}; if(ch==="L") leaf={c,r}; }
+      else if(ch==="~") row.push("sound");
+      else { row.push("floor"); if(ch==="P") player={c,r}; if(ch==="E") slime={c,r}; if(ch==="L") leaf={c,r}; if(ch==="X") crate={c,r}; if(ch==="M") patrol.push({c,r}); }
     }
     terrain.push(row);
   }
-  return {cols:def.cols, rows:def.rows, name:def.name, ambush:!!def.ambush, terrain, player, slime, leaf, exit};
+  patrol.sort((a,b)=> a.c-b.c || a.r-b.r);   // 경로를 좌→우(또는 위→아래) 순서로 정렬
+  return {cols:def.cols, rows:def.rows, name:def.name, ambush:!!def.ambush, terrain, player, slime, leaf, exit, crate, patrol};
 }
 
 function startStage(key){
   const p=parseStage(STAGES[key]);
-  S={ cols:p.cols, rows:p.rows, name:p.name, terrain:p.terrain, exit:p.exit, ambush:p.ambush,
+  S={ cols:p.cols, rows:p.rows, name:p.name, stageId:key, terrain:p.terrain, exit:p.exit, ambush:p.ambush,
       player:{c:p.player.c,r:p.player.r,hp:10,maxhp:10,dir:"down"},
       slime:{c:p.slime.c,r:p.slime.r,hp:3,alive:true, ambush:p.ambush, state:(p.ambush?"asleep":"awake"), woke:false, stirred:false, stunned:false, stunTimer:0, justStunned:false},
       leaf:{c:p.leaf.c,r:p.leaf.r,collected:false},
-      hasLeaf:false, hits:0, turn:0, status:"play", everWoke:false, everStunned:false };
+      crate: p.crate ? {c:p.crate.c, r:p.crate.r} : null,
+      patrol: (p.patrol && p.patrol.length) ? {path:p.patrol.slice(), idx:0, dir:1, c:p.patrol[0].c, r:p.patrol[0].r, hidden:false} : null,
+      hasLeaf:false, hits:0, noise:0, pushes:0, turn:0, status:"play", everWoke:false, everStunned:false };
   busy=false; logLines=[];
   $("game").classList.add("on"); $("title").style.display="none"; $("overlay").classList.remove("on");
   slimeEl.style.display=""; slimeEl.querySelector(".fig").classList.remove("dead");
@@ -520,10 +654,13 @@ function startStage(key){
   leafEl.style.display=""; boardEl.classList.remove("has-leaf");
 
   buildBoard();
-  $("stageName").textContent=(S.cols===8?"1층 · ":"")+S.name;
+  $("stageName").textContent = S.name;
+  renderStageChips();
   updateGoal(); updateQuality();
   pushLog("탐험가가 미궁에 들어섰다.");
   if(S.slime.state==="asleep"){ pushLog("구석에 슬라임이 곤히 잠들어 있다…"); pushLog("깨우지 않고 지나갈 길이 있을까?"); }
+  if(S.patrol) pushLog("점선 칸은 박쥐가 노리는 다음 길목이다.");
+  if(STAGES[key].hint) pushLog(STAGES[key].hint);
   else pushLog("반짝잎을 찾아 채집하자.");
   layout(); syncHud(); renderActors(true); renderLeaf(); renderMarkers();
 }
@@ -540,6 +677,7 @@ function buildBoard(){
       else if(t==="rock"){ cell.className="cell floor"+alt;
         const rv=((c*3+r*7)%3), rc=(rv===1?" r2":rv===2?" r3":"");
         cell.innerHTML='<div class="rockArt'+rc+'" style="z-index:'+(20+r*2-1)+'"></div>'; }
+      else if(t==="sound"){ cell.className="cell floor sound"+alt; cell.innerHTML='<div class="soundArt"><i></i><i></i><i></i></div>'; }
       else { cell.className="cell floor"+alt; }
       cell.dataset.c=c; cell.dataset.r=r;
       frag.appendChild(cell);
@@ -562,7 +700,24 @@ function onTap(c,r){
     if(S.slime.stunned){ pushLog("기절한 슬라임이 길을 막고 있다."); return; }
     playerPush(); return;
   }
+  if(S.crate && S.crate.c===c && S.crate.r===r){
+    const dc=c-p.c, dr=r-p.r, dir=dr<0?"up":dr>0?"down":dc<0?"left":"right";
+    S.player.dir=dir; tryPushCrate(dir); return;
+  }
+  if(S.patrol && S.patrol.c===c && S.patrol.r===r){
+    const dc=c-p.c, dr=r-p.r, dir=dr<0?"up":dr>0?"down":dc<0?"left":"right";
+    S.player.dir=dir; bumpIntoPatrol(); return;
+  }
   playerMove(c,r);
+}
+
+async function bumpIntoPatrol(){
+  busy=true;
+  blockedDir(S.player.dir);                 // 제자리 — 박쥐 칸으로는 들어가지 않음
+  hurtPlayer("말랑 박쥐와 부딪혔다! HP -1");
+  await wait(220);
+  if(S.player.hp<=0){ endGame(false); return; }
+  await enemyTurn(); finishTurn();
 }
 
 async function playerMove(c,r){
@@ -574,6 +729,7 @@ async function playerMove(c,r){
   // pick up leaf?
   let collectedNow=false;
   if(!S.leaf.collected && c===S.leaf.c && r===S.leaf.r){ collectLeaf(); collectedNow=true; }
+  else if(S.terrain[r][c]==="sound"){ stepSound(); }
   else pushLog("탐험가가 한 칸 옮겼다.");
   checkAmbush();
   await wait(160);
@@ -593,11 +749,54 @@ function collectLeaf(){
   grabFx(S.leaf.c, S.leaf.r);
   updateGoal();
   pushLog("반짝잎을 조심히 채집했다.");
-  pushLog("이제 가게로 돌아가자.");
+  pushLog("조용히 가게로 돌아가자.");
 }
+
+async function tryPushCrate(dir){
+  const d=dirDelta(dir);
+  const bc=S.crate.c+d[0], br=S.crate.r+d[1];   // 돌이 밀려갈 칸
+  // 밀 수 없는 경우 — 턴 소비 없음, 로그만
+  if(bc<0||br<0||bc>=S.cols||br>=S.rows){ blockedDir(dir); pushLog("돌이 꿈쩍도 하지 않는다."); crateShake(); return; }
+  const t=S.terrain[br][bc];
+  if(t==="rock"||t==="exit"){ blockedDir(dir); pushLog("이쪽으로는 밀 수 없다."); crateShake(); return; }
+  if(!S.leaf.collected && bc===S.leaf.c && br===S.leaf.r){ blockedDir(dir); pushLog("반짝잎 위로는 밀 수 없다."); crateShake(); return; }
+  if(S.slime.alive && S.slime.c===bc && S.slime.r===br){ blockedDir(dir); pushLog("슬라임이 막고 있어 밀 수 없다."); crateShake(); return; }
+  if(S.patrol && S.patrol.c===bc && S.patrol.r===br){ blockedDir(dir); pushLog("말랑 박쥐가 막고 있어 밀 수 없다."); crateShake(); return; }
+  // 성공 — 1턴 (돌 1칸 이동 + 플레이어가 돌이 있던 칸으로)
+  busy=true;
+  const fromC=S.crate.c, fromR=S.crate.r;
+  S.crate.c=bc; S.crate.r=br;
+  S.player.c=fromC; S.player.r=fromR; S.player.dir=dir;
+  S.pushes++;
+  renderActors(); renderMarkers();
+  bump(crateEl);
+  pushLog("돌을 밀어 길을 막았다.");
+  if(S.terrain[fromR][fromC]==="sound") stepSound();   // 돌이 있던 칸이 소리 타일이면 바스락
+  checkAmbush();
+  await wait(170);
+  await enemyTurn(); finishTurn();
+}
+function crateShake(){ crateEl.classList.remove("nudge-c"); void crateEl.offsetWidth; crateEl.classList.add("nudge-c"); }
 
 /* 잠복 슬라임(02B): 2칸 이내 접근에만 깨어남. 잎 채집 자체로는 깨우지 않음
    → 2칸 감지 밖으로 조용히 채집·귀환하면 안 깨우고 A. 직전엔 3칸에서 '꿈틀…' 경고. */
+function stepSound(){
+  S.noise++;
+  soundFx(S.player.c, S.player.r);
+  const ce=boardEl.querySelector('.cell[data-c="'+S.player.c+'"][data-r="'+S.player.r+'"]');
+  if(ce){ ce.classList.add("ripple"); setTimeout(()=>ce.classList.remove("ripple"),500); }
+  syncHud();
+  const sl=S.slime;
+  // 소리는 '재료가 상하는' 품질 페널티 + 긴장 연출. 슬라임을 직접 깨우진 않고 꿈틀거리게만 한다(깸은 거리로).
+  if(sl.alive && sl.ambush && sl.state!=="awake"){
+    if(!sl.stirred){ sl.stirred=true; slimeEl.classList.add("stirring"); }
+    pushLog("바스락! 슬라임이 꿈틀거린다…");
+  } else if(sl.alive && sl.state==="awake"){
+    pushLog("바스락! 소리가 크게 울렸다.");
+  } else {
+    pushLog("바스락! 마른 잎이 소리를 냈다.");
+  }
+}
 function mdToSlime(){ return Math.abs(S.slime.c-S.player.c)+Math.abs(S.slime.r-S.player.r); }
 function checkAmbush(){
   const sl=S.slime;
@@ -618,9 +817,10 @@ function wakeSlime(reason){
   slimeEl.classList.add("awake","woke-flash");
   setTimeout(()=>slimeEl.classList.remove("woke-flash"), 520);
   wakeFx(sl.c, sl.r);
-  pushLog( reason==="leaf" ? "반짝잎 향기에 슬라임이 깨어났다!"
-         : reason==="push" ? "잠든 슬라임을 밀쳐 깨워버렸다!"
-         : "인기척에 슬라임이 깨어났다!" );
+  pushLog( reason==="leaf" ? "향기에 슬라임이 깨어났다! 다음 턴부터 추격"
+         : reason==="push" ? "밀쳐서 슬라임을 깨웠다! 다음 턴부터 추격"
+         : reason==="sound" ? "바스락 소리에 슬라임이 깨어났다! 다음 턴부터 추격"
+         : "인기척에 슬라임이 깨어났다! 다음 턴부터 추격" );
   renderMarkers();
 }
 
@@ -655,7 +855,7 @@ async function endTurn(){
   await enemyTurn(); finishTurn();
 }
 
-async function enemyTurn(){
+async function slimeTurn(){
   const sl=S.slime, p=S.player; if(!sl.alive) return;
   if(sl.stunned){
     if(sl.justStunned){ sl.justStunned=false; await wait(120); return; }   // 막 기절한 턴 — 카운트 그대로
@@ -689,6 +889,55 @@ async function enemyTurn(){
   else{ pushLog("슬라임이 길을 잃고 두리번거린다."); await wait(120); }
 }
 
+async function enemyTurn(){
+  await slimeTurn();
+  if(S.status!=="play") return;
+  if(S.patrol) await patrolMove();
+}
+function patrolBlocked(c,r){
+  if(c<0||r<0||c>=S.cols||r>=S.rows) return true;
+  const t=S.terrain[r][c];
+  if(t==="rock"||t==="exit") return true;
+  if(S.crate && S.crate.c===c && S.crate.r===r) return true;       // 밀어둔 돌이 순찰로를 막음
+  if(S.slime.alive && S.slime.c===c && S.slime.r===r) return true;
+  return false;
+}
+async function patrolMove(){
+  const pt=S.patrol; if(!pt || pt.path.length<2) return;
+  let ni=pt.idx+pt.dir;
+  if(ni<0||ni>=pt.path.length){ pt.dir*=-1; ni=pt.idx+pt.dir; }     // 경로 끝 → 방향 반전
+  const cell=pt.path[ni];
+  // 다음 칸에 플레이어 → 이동하지 않고 그 칸을 공격, 방향 유지 (no-overlap: 박쥐는 자기 칸에 머문다)
+  if(cell.c===S.player.c && cell.r===S.player.r){
+    patrolEl.classList.remove("nudge-b"); void patrolEl.offsetWidth; patrolEl.classList.add("nudge-b");
+    renderActors();
+    hurtPlayer("말랑 박쥐가 앞칸을 덮쳤다! HP -1");
+    await wait(280);
+    if(S.player.hp<=0) endGame(false);
+    return;                                                          // idx/dir 그대로 = 제자리 + 방향 유지
+  }
+  // 돌/바위/벽 → 이동하지 않고 방향 반전 (플레이어 막힘과 구분)
+  if(patrolBlocked(cell.c,cell.r)){
+    const byCrate = S.crate && S.crate.c===cell.c && S.crate.r===cell.r;
+    pt.dir*=-1;
+    patrolEl.classList.remove("nudge-b"); void patrolEl.offsetWidth; patrolEl.classList.add("nudge-b");
+    renderActors(); renderMarkers();
+    pushLog(byCrate ? "말랑 박쥐가 돌에 막혀 돌아섰다." : "길이 막혀 말랑 박쥐가 방향을 바꿨다.");
+    await wait(220); return;
+  }
+  // 이동 (겹침 없음 보장)
+  pt.idx=ni; pt.c=cell.c; pt.r=cell.r;
+  renderActors(); renderMarkers();
+  await wait(160);
+}
+function hurtPlayer(msg){
+  shake(playerEl); hitFx(S.player.c, S.player.r);
+  S.player.hp=Math.max(0,S.player.hp-1); S.hits++;
+  const before=quality();
+  pushLog(msg); syncHud(); updateQuality();
+  if(quality()!==before || S.hits===1) pushLog("반짝잎 품질이 흔들린다…");
+}
+
 function finishTurn(){ if(S.status!=="play") return; S.turn++; syncHud(); renderMarkers(); busy=false; }
 
 /* pathfinding on playable cells */
@@ -697,6 +946,7 @@ function slimeWalkable(c,r){
   const t=S.terrain[r][c];
   if(t==="rock"||t==="exit") return false;
   if(c===S.player.c && r===S.player.r) return false;
+  if(S.crate && S.crate.c===c && S.crate.r===r) return false;                          // 밀 수 있는 돌 = 슬라임 장애물(우회 유도)
   if(S.slime.alive && S.slime.stunned && S.slime.c===c && S.slime.r===r) return false;  // 기절 슬라임 칸 = 장애물
   return true;
 }
@@ -734,6 +984,11 @@ function renderActors(snap){
   if(S.slime.alive) slimeEl.style.zIndex = 20 + S.slime.r*2;
   place(playerEl, S.player.c, S.player.r);
   if(S.slime.alive) place(slimeEl, S.slime.c, S.slime.r);
+  if(S.crate){ crateEl.style.display=""; crateEl.style.zIndex = 20 + S.crate.r*2 - 1; place(crateEl, S.crate.c, S.crate.r); }
+  else crateEl.style.display="none";
+  if(S.patrol){ patrolEl.style.display=""; patrolEl.style.zIndex = 20 + S.patrol.r*2 + 1; place(patrolEl, S.patrol.c, S.patrol.r);
+    patrolEl.classList.toggle("face-left", S.patrol.dir<0); patrolEl.classList.toggle("face-right", S.patrol.dir>=0); }
+  else patrolEl.style.display="none";
 }
 function renderLeaf(){ if(!S.leaf.collected){ leafEl.style.zIndex = 20 + S.leaf.r*2; place(leafEl, S.leaf.c, S.leaf.r); } }
 function renderMarkers(){
@@ -752,6 +1007,20 @@ function renderMarkers(){
     if(slimeHere && !pushable) continue; // 자는 슬라임 칸엔 표식 없음
     markersEl.appendChild(mk);
   }
+  // 순찰 몬스터가 다음 턴에 이동할 칸 예고 (억울함 방지)
+  if(S.patrol && S.patrol.path.length>1){
+    const pt=S.patrol; let ni=pt.idx+pt.dir;
+    if(ni<0||ni>=pt.path.length) ni=pt.idx-pt.dir;        // 경로 끝이면 반대쪽이 다음
+    const nx=pt.path[ni];
+    const blocked = nx && (patrolBlocked(nx.c,nx.r));
+    if(nx && !blocked){
+      const mk=document.createElement("div");
+      mk.className="mk patrolnext";
+      mk.style.transform=`translate(${nx.c*tile}px, ${nx.r*tile}px)`;
+      mk.innerHTML='<div class="pdot"></div>';
+      markersEl.appendChild(mk);
+    }
+  }
 }
 
 /* fx */
@@ -764,9 +1033,15 @@ function hitFx(c,r){ floatTxt(c,r,"dmg red","-1"); }
 function wakeFx(c,r){ floatTxt(c,r,"wake","!"); }
 function pushFx(c,r){ floatTxt(c,r,"dmg push","밀치기"); }
 function grabFx(c,r){ floatTxt(c,r,"grab","반짝잎 +1"); }
+function soundFx(c,r){ floatTxt(c,r,"noise","바스락!"); }
 
 /* hud + quality */
-function quality(){ return S.hits===0?"A":S.hits===1?"B":"C"; }
+function quality(){
+  if(S.hits>=2) return "C";          // 두 번 이상 맞으면 재료가 상한다
+  if(S.hits===1) return "B";          // 한 번 맞음
+  if(S.noise>0) return "B";           // 안 맞았어도 시끄럽게 다녀오면 A는 아니다
+  return "A";                          // 피격 0 + 소리 0
+}
 function updateQuality(){
   const q=quality(), pill=$("qPill");
   pill.textContent="품질 "+q;
@@ -777,7 +1052,8 @@ function updateGoal(){
   $("goalIcon").classList.toggle("collected", S.hasLeaf);
 }
 function syncHud(){ $("turnNum").textContent=S.turn; $("hpNow").textContent=S.player.hp; $("hpMax").textContent=S.player.maxhp;
-  const hh=$("hpNow"); if(hh) hh.style.color = S.player.hp<=3 ? "#ff5a6a" : S.player.hp<=6 ? "#ffb05e" : "#ff8a98"; }
+  const hh=$("hpNow"); if(hh) hh.style.color = S.player.hp<=3 ? "#ff5a6a" : S.player.hp<=6 ? "#ffb05e" : "#ff8a98";
+  const np=$("noisePill"); if(np){ if(S.noise>0){ np.style.display=""; np.textContent="소리 "+S.noise; } else np.style.display="none"; } }
 function pushLog(text){
   logLines.push(text); if(logLines.length>3) logLines=logLines.slice(-3);
   const ps=$("log").querySelectorAll("p"), shown=logLines.slice(-3);
@@ -792,7 +1068,7 @@ function endGame(win){
   syncHud();
   const q=quality();
   setTimeout(()=>{
-    const perfect = win && S.ambush && !S.everWoke;   // 잠복 슬라임을 한 번도 깨우지 않고 클리어
+    const perfect = win && S.ambush && !S.everWoke && S.hits===0 && S.noise===0;   // 안 깨움 + 무피격 + 무소리
     const rl=$("resLeaf");
     rl.className="resultLeaf"+(win?(" q"+q.toLowerCase()):" fail")+(perfect?" perfect":"");
     $("ovTitle").textContent = !win ? "채집 실패" : perfect ? "완벽 회피!" : "채집 성공!";
@@ -803,17 +1079,19 @@ function endGame(win){
     $("qBig").style.display = win ? "" : "none";
     $("qCap").style.display = win ? "" : "none";
     $("qCap").textContent = perfect ? "반짝잎 품질 A · 향이 그대로 살아 있다"
-                          : q==="A" ? "반짝잎 품질 · 깨끗하게 가져왔다"
-                          : q==="B" ? "반짝잎 품질 · 살짝 스쳤다"
-                          : "반짝잎 품질 · 많이 시달렸다";
+                          : q==="A" ? "반짝잎 품질 A · 잎이 깨끗하게 살아 있다"
+                          : q==="B" ? "반짝잎 품질 B · 조금 바스락거렸지만 쓸 만하다"
+                          : "반짝잎 품질 C · 향이 많이 흩어졌다";
     const slimeStat = S.everStunned ? "밀쳐 재움"
                     : S.ambush ? (S.everWoke ? "깨움" : "안 깨움")
                     : "피해서 통과";
     $("stats").innerHTML =
-      '<div><span>보드</span><b>'+S.name+'</b></div>'+
+      '<div><span>스테이지</span><b>'+S.name+'</b></div>'+
       '<div><span>걸린 턴</span><b>'+S.turn+'</b></div>'+
       '<div><span>슬라임</span><b>'+slimeStat+'</b></div>'+
+      '<div><span>소리</span><b>'+S.noise+'회</b></div>'+
       '<div><span>피격</span><b>'+S.hits+'회</b></div>'+
+      (S.pushes>0?'<div><span>돌 밀기</span><b>'+S.pushes+'회</b></div>':'')+
       '<div><span>남은 HP</span><b>'+S.player.hp+' / '+S.player.maxhp+'</b></div>'+
       (win?('<div><span>재료 품질</span><b>'+q+'</b></div>'):'');
     $("overlay").classList.add("on");
@@ -828,7 +1106,7 @@ function layout(){
   const availW=wrap.clientWidth  - FRAME_PAD*2 - 8;
   const availH=wrap.clientHeight - FRAME_PAD*2 - 8;
   let t=Math.floor(Math.min(availW/S.cols, availH/S.rows));
-  t=Math.max(38, Math.min(66, t));
+  t=Math.max(40, Math.min(72, t));
   tile=t; document.documentElement.style.setProperty("--tile", t+"px");
   boardEl.style.width=(t*S.cols)+"px"; boardEl.style.height=(t*S.rows)+"px";
   renderActors(true); renderLeaf(); renderMarkers();
@@ -852,6 +1130,108 @@ $("mHome").addEventListener("click", ()=>{ closeMenu(); goHome(); });
 $("mHelp").addEventListener("click", ()=>{ $("menuHelp").classList.toggle("on"); });
 $("menuPop").addEventListener("click", e=>{ if(e.target.id==="menuPop") closeMenu(); });
 
+/* ===== 퍼즐 씨앗 장부 (R&D 기록 전용 — 게임 로직 비관여) ===== */
+const SEED_CAT = { "지형":"#c89b6a","오브젝트":"#b0936e","몬스터":"#86c25f","도구":"#b08fd0","재료":"#5fc0a0","품질":"#ffd56b","레벨 디자인":"#e0a060" };
+const SEED_STAT = {
+  SEED:{label:"씨앗",c:"#9a8a72"}, NEXT_CANDIDATE:{label:"다음 후보",c:"#8fd06a"}, PROTOTYPE_READY:{label:"구현 가능",c:"#6cc0e0"},
+  LATER:{label:"나중에",c:"#b89a70"}, RISKY:{label:"위험",c:"#e89a4a"}, ADOPTED:{label:"채택",c:"#ffd56b"}
+};
+const SEEDS = [
+  { name:"소리 타일", category:"지형", status:"ADOPTED", priority:1, fit7x9:"높음", difficulty:"낮음",
+    coreFun:"짧은 길은 위험하고, 먼 길은 조용하다.", risk:"경고가 안 읽히면 억울할 수 있다.",
+    qualityHook:"소리 0회=A, 소리 1회+=B. 완벽 회피는 소리 0.", firstPrototype:"반짝잎으로 가는 짧은 길에 소리 타일 2개 배치.",
+    transferNote:"08B에서 7×9 기본판에 프로토타입 구현 — 조용한 먼 길(A)/바스락 짧은 길(B)/직진(C) 분리. 소리는 품질 페널티+꿈틀, 깸은 거리로." },
+  { name:"밀 수 있는 장애물", category:"오브젝트", status:"ADOPTED", priority:2, fit7x9:"높음", difficulty:"중간",
+    coreFun:"상자나 돌을 밀어 슬라임의 길을 막거나 우회시킨다.", risk:"출구/재료를 막아 소프트락이 생길 수 있다.",
+    qualityHook:"돌 사용은 품질에 영향 없음(똑똑한 회피). 피격/소리/기상만 품질 결정.", firstPrototype:"밀 수 있는 돌 1개로 슬라임 추격로를 막는 퍼즐.",
+    transferNote:"08C에서 7×9 기본판에 프로토타입 구현 — 잡지 않고 막는 수습 수단. 돌은 슬라임 BFS 장애물(우회 유도), 출구/잎/바위/슬라임 쪽은 못 밂." },
+  { name:"순찰 몬스터", category:"몬스터", status:"ADOPTED", priority:3, fit7x9:"높음", difficulty:"중간",
+    coreFun:"정해진 경로를 도는 몬스터의 다음 위치를 읽고, 타이밍을 맞추거나 돌로 길을 막는다.", risk:"경로 표시가 없으면 불공정하게 느껴질 수 있다.",
+    qualityHook:"접촉/피격 없이 통과하면 A 유지. 충돌은 일반 피격과 동일하게 품질에 반영.", firstPrototype:"좌우 3칸을 반복 순찰하는 말랑 박쥐.",
+    transferNote:"09에서 7×9 기본판에 프로토타입 구현, 09B에서 no-overlap 문법 확정 — 박쥐는 플레이어와 겹치지 않고 자기 칸에서 다음 칸을 공격(방향 유지), 돌/바위 앞에서는 제자리+방향 반전. 대기에도 매 턴 이동. 다음 칸 예고 마커로 억울함 방지." },
+  { name:"Stage Meaning Pack", category:"레벨 디자인", status:"ADOPTED", priority:1, fit7x9:"높음", difficulty:"낮음",
+    coreFun:"기믹이 필요한 상황을 만들어, 요소가 단순 기능이 아니라 플레이어 서사가 되게 한다.", risk:"스테이지가 너무 비슷하면 의미 차이가 약해진다.",
+    qualityHook:"각 스테이지가 다른 품질 압박(조용함/타이밍/수습)을 만든다.", firstPrototype:"7×9 Stage 3종 — 조용한 반짝잎 / 박쥐 길목 / 바스락 수습로.",
+    transferNote:"10에서 7×9 Stage Pack 3종으로 실험. 돌+박쥐=가두고 회수, 소리=빠른 길의 대가, 슬라임=조용함의 압박." },
+  { name:"Pushable Rock Readability Polish", category:"비주얼/오브젝트 폴리싱", status:"LATER", priority:5, fit7x9:"높음", difficulty:"낮음",
+    coreFun:"고정 바위와 달리 밀 수 있는 돌/상자로 즉시 읽히게 한다.", risk:"보상처럼 보이면 안 되고, 길을 막는 물건으로 읽혀야 한다.",
+    qualityHook:"가독성만 개선, 게임 규칙 변화 없음.", firstPrototype:"둥근 굴림돌 / 작은 약재 상자 / 손잡이 있는 돌 중 택1.",
+    transferNote:"08C에서 밝은 모래색 돌로 1차 구분 완료. 추후 상자류로 더 또렷하게 다듬을 여지." },
+  { name:"위치교환 도구", category:"도구", status:"LATER", priority:4, fit7x9:"중간", difficulty:"중간",
+    coreFun:"몬스터나 오브젝트와 위치를 바꿔 위기를 탈출한다.", risk:"7×9에서는 너무 강력해서 퍼즐을 깨뜨릴 수 있다.",
+    qualityHook:"도구 사용 횟수에 따라 완벽 회피 보너스와 충돌 가능.", firstPrototype:"1회용 자리바꿈 지팡이.",
+    transferNote:"기본 압력이 생긴 뒤 넣어야 가치가 보인다." },
+  { name:"빙판길", category:"지형", status:"LATER", priority:5, fit7x9:"중간", difficulty:"중간",
+    coreFun:"한 방향으로 끝까지 미끄러져 정지 지점을 계산한다.", risk:"게임 전체가 빙판 퍼즐처럼 변할 수 있다.",
+    qualityHook:"충돌/소음/피격과 연결 가능.", firstPrototype:"7×9 일부 구역에만 3~4칸 빙판 배치.",
+    transferNote:"테마 채집지 후보. 기본 규칙이 잡힌 뒤 실험." },
+  { name:"꿀뿌리", category:"재료", status:"LATER", priority:6, fit7x9:"높음", difficulty:"중간",
+    coreFun:"재료를 들면 달콤한 냄새 때문에 슬라임 감지 반경이 늘어난다.", risk:"채집 후 귀환이 갑자기 어려워져 억울할 수 있다.",
+    qualityHook:"냄새 추격 중 피격/소리 여부로 품질 변화.", firstPrototype:"채집 후 슬라임 감지 반경 +1.",
+    transferNote:"재료별 규칙의 첫 후보." },
+  { name:"달이슬", category:"재료", status:"LATER", priority:7, fit7x9:"높음", difficulty:"낮음",
+    coreFun:"피격당하면 품질이 크게 흔들리는 섬세한 재료.", risk:"단순히 피격 금지로만 느껴질 수 있다.",
+    qualityHook:"피격 0회=A, 1회=C 또는 B 이하.", firstPrototype:"달이슬 스테이지에서 피격 시 품질 급락.",
+    transferNote:"품질 시스템을 감정적으로 강화하는 후보." },
+  { name:"조용한 신발", category:"도구", status:"LATER", priority:8, fit7x9:"높음", difficulty:"낮음",
+    coreFun:"소리 타일 1회를 무시해 짧은 길을 안전하게 통과한다.", risk:"소리 타일 퍼즐을 무력화할 수 있다.",
+    qualityHook:"도구를 써도 A를 유지할지, 별도 보너스를 둘지 고민 필요.", firstPrototype:"1회용 소리 무시.",
+    transferNote:"소리 타일이 재미있다고 판정된 뒤 추가." },
+  { name:"잠버섯", category:"재료", status:"SEED", priority:9, fit7x9:"중간", difficulty:"중간",
+    coreFun:"들고 있으면 근처 슬라임이 졸리거나 반응이 둔해진다.", risk:"위험을 줄이는 재료라 긴장감이 약해질 수 있다.",
+    qualityHook:"잠든 상태를 유지하고 귀환하면 고품질 후보.", firstPrototype:"채집 후 슬라임 이동 주기 1턴 지연.",
+    transferNote:"위험을 높이는 재료와 반대로, 위험을 낮추는 재료군 후보." },
+  { name:"유리꽃", category:"재료", status:"SEED", priority:10, fit7x9:"높음", difficulty:"낮음",
+    coreFun:"들고 있는 동안 피격/충돌/밀치기 사용 시 품질이 크게 깨진다.", risk:"플레이가 너무 소극적으로 변할 수 있다.",
+    qualityHook:"충돌 0회=A, 1회=B/C.", firstPrototype:"유리꽃 채집 후 밀치기 사용 시 품질 하락.",
+    transferNote:"싸우면 재료가 상한다는 철학을 직접 강화한다." },
+  { name:"연막 가루", category:"도구", status:"LATER", priority:11, fit7x9:"중간", difficulty:"중간",
+    coreFun:"한 번 사용하면 슬라임 감지를 끊고 탈출 루트를 만든다.", risk:"위기 탈출 만능키가 될 수 있다.",
+    qualityHook:"도구 사용은 A 유지 가능하지만 별도 완벽 회피와 구분 필요.", firstPrototype:"1회용, 사용 턴에 슬라임 추격 중단 또는 1턴 대기.",
+    transferNote:"추격 압력이 충분히 생긴 뒤 추가." },
+  { name:"시야 방향 몬스터", category:"몬스터", status:"LATER", priority:12, fit7x9:"중간", difficulty:"중간~높음",
+    coreFun:"몬스터가 바라보는 방향만 위험해서, 시야를 피하는 수읽기가 생긴다.", risk:"방향 표시가 명확하지 않으면 억울하다.",
+    qualityHook:"시야에 한 번도 들지 않으면 A 보너스 후보.", firstPrototype:"1칸 폭 직선 시야 2~3칸.",
+    transferNote:"잠복/순찰 이후의 고급 회피 문법 후보." }
+];
+const LEDGER_FILTERS = [
+  {key:"all",label:"전체"},{key:"NEXT_CANDIDATE",label:"다음 후보"},
+  {key:"지형",label:"지형"},{key:"오브젝트",label:"오브젝트"},{key:"몬스터",label:"몬스터"},{key:"도구",label:"도구"},{key:"재료",label:"재료"},{key:"레벨 디자인",label:"레벨"},{key:"LATER",label:"나중에"}
+];
+let ledgerFilter="all";
+function esc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function renderLedger(){
+  const fwrap=$("ledgerFilters"); fwrap.innerHTML="";
+  LEDGER_FILTERS.forEach(f=>{
+    const b=document.createElement("button"); b.className="lfChip"+(f.key===ledgerFilter?" on":""); b.textContent=f.label;
+    b.addEventListener("click", ()=>{ ledgerFilter=f.key; renderLedger(); });
+    fwrap.appendChild(b);
+  });
+  const list=$("ledgerList"); list.innerHTML="";
+  const items=SEEDS.filter(s=> ledgerFilter==="all" || s.category===ledgerFilter || s.status===ledgerFilter).sort((a,b)=>a.priority-b.priority);
+  for(const s of items){
+    const cat=SEED_CAT[s.category]||"#888", st=SEED_STAT[s.status]||{label:s.status,c:"#888"};
+    const card=document.createElement("div"); card.className="seedCard"; card.style.setProperty("--sc",cat);
+    card.innerHTML=
+      '<div class="scTop"><span class="scPri">'+s.priority+'</span><span class="scName">'+esc(s.name)+'</span>'+
+      '<span class="scBadge" style="background:'+st.c+'">'+st.label+'</span></div>'+
+      '<div class="scMeta"><span class="scTag" style="color:'+cat+';border-color:'+cat+'55">'+esc(s.category)+'</span>'+
+      '<span class="scTag">7×9 <b>'+esc(s.fit7x9)+'</b></span><span class="scTag">난이도 <b>'+esc(s.difficulty)+'</b></span></div>'+
+      '<div class="scFun">'+esc(s.coreFun)+'</div>'+
+      '<div class="scRows">'+
+      '<div class="scRow"><b>위험</b> '+esc(s.risk)+'</div>'+
+      '<div class="scRow"><b>품질</b> '+esc(s.qualityHook)+'</div>'+
+      '<div class="scRow"><b>첫 실험</b> '+esc(s.firstPrototype)+'</div>'+
+      '<div class="scRow"><b>이관</b> '+esc(s.transferNote)+'</div></div>';
+    list.appendChild(card);
+  }
+}
+function openLedger(){ $("ledgerPop").classList.add("on"); renderLedger(); }
+function closeLedger(){ $("ledgerPop").classList.remove("on"); }
+$("mLedger").addEventListener("click", ()=>{ closeMenu(); openLedger(); });
+$("lClose").addEventListener("click", closeLedger);
+$("ledgerPop").addEventListener("click", e=>{ if(e.target.id==="ledgerPop") closeLedger(); });
+
 /* ===== 하단 4방향 패드 (기본 조작) ===== */
 function dirDelta(d){ return d==="up"?[0,-1]:d==="down"?[0,1]:d==="left"?[-1,0]:[1,0]; }
 function tryMove(dir){
@@ -863,6 +1243,8 @@ function tryMove(dir){
     if(S.slime.stunned){ blockedDir(dir); pushLog("기절한 슬라임이 길을 막고 있다."); return; }              // 턴 소비 안 함
     S.player.dir=dir; playerPush(); return;                                                                  // 밀치기
   }
+  if(S.crate && S.crate.c===nc && S.crate.r===nr){ S.player.dir=dir; tryPushCrate(dir); return; }            // 돌 밀기
+  if(S.patrol && S.patrol.c===nc && S.patrol.r===nr){ S.player.dir=dir; bumpIntoPatrol(); return; }          // 순찰 몬스터와 충돌
   playerMove(nc,nr);                                                                                         // 이동/채집/귀환
 }
 function blockedDir(dir){ const b=document.querySelector('.dbtn[data-dir="'+dir+'"]'); if(!b) return;
@@ -873,7 +1255,19 @@ window.addEventListener("keydown", e=>{
   if(m[e.key]){ e.preventDefault(); tryMove(m[e.key]); }
   else if(e.key===" "){ e.preventDefault(); endTurn(); }
 });
-function keyFromCols(){ return S? S.cols+"x"+S.rows : null; }
+function keyFromCols(){ return S? S.stageId : null; }
+function renderStageChips(){
+  const wrap=$("stageRow"); if(!wrap) return;
+  wrap.innerHTML="";
+  for(const key of ["s1","s2","s3"]){
+    const st=STAGES[key];
+    const c=document.createElement("button");
+    c.className="stageChip"+(S && S.stageId===key ? " active" : "");
+    c.textContent=st.name;
+    c.addEventListener("click", ()=>{ if(!S || S.stageId!==key) startStage(key); });
+    wrap.appendChild(c);
+  }
+}
 function goHome(){ $("overlay").classList.remove("on"); $("game").classList.remove("on"); $("title").style.display=""; S=null; busy=false; }
 
 function wait(ms){ return new Promise(res=>setTimeout(res,ms)); }
