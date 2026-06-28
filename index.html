@@ -54,21 +54,20 @@
   /* ---------- GAME ---------- */
   #game{ display:none; flex-direction:column; height:100%; gap:7px; }
   #game.on{ display:flex; }
-  .hud{ background:linear-gradient(180deg,#2a1f15,#19110a); border:1px solid var(--panel-edge); border-radius:14px;
-    padding:8px 11px; display:flex; flex-direction:column; gap:6px; box-shadow:0 3px 8px rgba(0,0,0,.3); }
-  .hud .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-  .stage-name{ font-size:13.5px; font-weight:700; letter-spacing:.3px; }
-  .turn{ font-size:12px; color:var(--muted); } .turn b{ color:#cdd3ea; font-variant-numeric:tabular-nums; }
-  .hpwrap{ display:flex; align-items:center; gap:8px; flex:1; }
-  .hpbar{ flex:1; height:9px; border-radius:6px; background:#140c06; overflow:hidden; border:1px solid #2a3043; }
-  .hpfill{ height:100%; width:100%; border-radius:5px; background:linear-gradient(90deg,#ff6a7d,#ff97a4); transition:width .25s ease; }
-  .hpnum{ font-size:12px; color:#ffd2d8; font-variant-numeric:tabular-nums; min-width:60px; text-align:right; }
-  .hpnum .hh{ color:#ff8a98; }
-  .qpill{ font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; border:1px solid var(--panel-edge); white-space:nowrap;
-    background:#170f07; letter-spacing:.3px; }
+  .hud{ position:relative; background:linear-gradient(180deg,#2a1f15,#19110a); border:1px solid var(--panel-edge); border-radius:12px;
+    padding:7px 11px; display:flex; flex-direction:column; gap:3px; box-shadow:0 3px 8px rgba(0,0,0,.3); }
+  .menuBtn{ position:absolute; top:5px; right:7px; width:30px; height:30px; border-radius:9px; cursor:pointer; touch-action:manipulation;
+    border:1px solid var(--panel-edge); background:linear-gradient(180deg,#322619,#1c1409); color:var(--ink); font-size:15px;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 0 #150d06; }
+  .menuBtn:active{ transform:translateY(2px); box-shadow:0 0 0 #150d06; }
+  .hudTop{ display:flex; align-items:center; gap:9px; padding-right:34px; }
+  .stage-name{ font-size:13px; font-weight:700; letter-spacing:.2px; white-space:nowrap; }
+  .hpmini{ font-size:12px; color:#ffd2d8; font-variant-numeric:tabular-nums; } .hpmini .hh{ color:#ff8a98; font-weight:700; }
+  .turn{ font-size:12px; color:var(--muted); margin-left:auto; } .turn b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .qpill{ font-size:11px; font-weight:800; padding:2px 9px; border-radius:999px; border:1px solid var(--panel-edge); white-space:nowrap; background:#170f07; letter-spacing:.3px; }
   .qpill.qa{ color:var(--qa); border-color:rgba(255,213,107,.5); box-shadow:0 0 8px rgba(255,213,107,.25); }
   .qpill.qb{ color:var(--qb); } .qpill.qc{ color:var(--qc); border-color:rgba(207,148,102,.5); }
-  .goalRow{ display:flex; align-items:center; gap:7px; font-size:12px; color:#cdd3ea; }
+  .goalRow{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:#cdd3ea; }
   .goalRow .gi{ width:14px; height:14px; flex:none; position:relative; }
   .gi .leafmini{ position:absolute; inset:0; background:linear-gradient(150deg,#a9f0c2,#5fc585); border-radius:0 60% 0 60%; transform:rotate(45deg); box-shadow:0 0 6px rgba(127,230,160,.6); }
   .gi.collected::after{ content:"✓"; position:absolute; right:-4px; bottom:-4px; font-size:10px; color:#1f2a22; background:var(--accent); border-radius:50%; width:11px; height:11px; line-height:11px; text-align:center; font-weight:900; }
@@ -160,7 +159,9 @@
   .actor .glow{ position:absolute; left:8%; bottom:6%; width:84%; height:46%; background:radial-gradient(50% 100% at 50% 100%, rgba(255,236,170,.5), transparent 70%); z-index:0; }
   .actor .inner{ position:absolute; inset:0; z-index:1; }
   .fig{ position:absolute; inset:0; }
-  .gshadow{ position:absolute; left:18%; bottom:6%; width:64%; height:15%; background:radial-gradient(50% 100% at 50% 50%, rgba(0,0,0,.56), transparent 72%); }
+  #player .fig{ transform:scale(1.28); transform-origin:50% 86%; }
+  #slime .fig{ transform:scale(1.24); transform-origin:50% 80%; }
+  .gshadow{ position:absolute; left:16%; bottom:5%; width:68%; height:16%; background:radial-gradient(50% 100% at 50% 50%, rgba(0,0,0,.6), transparent 70%); }
   .rise{ position:absolute; inset:0; animation:bob 2.4s ease-in-out infinite; }
   @keyframes bob{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6%)} }
   /* ===== 견습 연금술사 피규어 ===== */
@@ -276,16 +277,16 @@
   @keyframes rise-fade{ 0%{transform:translateY(0); opacity:0} 15%{opacity:1} 100%{transform:translateY(-130%); opacity:0} }
 
   /* log */
-  .log{ background:linear-gradient(180deg,#281d12,#180f08); border:1px solid var(--panel-edge); border-radius:12px; padding:7px 11px; min-height:52px; display:flex; flex-direction:column; justify-content:center; gap:2px; }
-  .log p{ margin:0; font-size:12px; color:var(--muted); line-height:1.45; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
-  .log p.last{ color:var(--ink); font-weight:600; }
+  .log{ background:none; border:none; border-radius:0; padding:1px 10px; min-height:18px; display:flex; align-items:center; justify-content:center; }
+  .log p{ display:none; margin:0; font-size:12px; color:var(--ink); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+  .log p.last{ display:block; color:#f0e6d2; font-weight:600; }
 
   /* controls */
   .controls{ display:flex; flex-direction:column; gap:8px; padding-top:2px; }
-  .dpad{ display:grid; gap:8px; width:100%; max-width:286px; margin:0 auto;
+  .dpad{ display:grid; gap:6px; width:100%; max-width:248px; margin:0 auto;
     grid-template-columns:repeat(3,1fr); grid-template-areas:"s1 up s2" "lf wt rt" "x1 dn x2"; }
   .dbtn{ appearance:none; cursor:pointer; touch-action:manipulation; -webkit-user-select:none; user-select:none;
-    border:1px solid var(--panel-edge); border-radius:15px; aspect-ratio:1/.78;
+    border:1px solid var(--panel-edge); border-radius:13px; aspect-ratio:1/.64;
     display:flex; align-items:center; justify-content:center; font-weight:800; transition:transform .06s, box-shadow .06s; }
   .dbtn.dir{ font-size:25px; color:#ffe6c8;
     background:linear-gradient(180deg,#3c2e1e,#241a10); box-shadow:0 5px 0 #140d06, 0 7px 11px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,225,180,.12); }
@@ -297,13 +298,25 @@
   .dbtn.wait{ grid-area:wt; font-size:15px; letter-spacing:.5px; color:#16240f;
     background:linear-gradient(180deg,#9be87e,#6cc24f); box-shadow:0 5px 0 #3f7d2c, 0 7px 11px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.3); }
   .dbtn.wait:active{ transform:translateY(4px); box-shadow:0 1px 0 #3f7d2c, 0 3px 6px rgba(0,0,0,.3); }
-  .slot{ grid-area:s1; border-radius:13px; border:1.5px dashed rgba(185,155,115,.22); background:rgba(255,225,180,.02); aspect-ratio:1/.78; }
+  .slot{ grid-area:s1; border-radius:11px; border:1.5px dashed rgba(185,155,115,.22); background:rgba(255,225,180,.02); aspect-ratio:1/.64; }
   .slot.s2{ grid-area:s2; }
   .subRow{ display:flex; gap:8px; max-width:286px; margin:0 auto; width:100%; }
   .subBtn{ flex:1; appearance:none; cursor:pointer; touch-action:manipulation; padding:9px; border-radius:11px; font-size:12.5px; font-weight:600; color:var(--ink);
     background:linear-gradient(180deg,#2f2417,#1c1409); border:1px solid var(--panel-edge); box-shadow:0 3px 0 #150d06; transition:transform .07s, box-shadow .07s; }
   .subBtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #150d06; }
   .hint{ text-align:center; font-size:10.5px; color:var(--faint); line-height:1.4; } .hint span{ color:var(--muted); }
+  /* 설정/메뉴 팝업 */
+  #menuPop{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(8,6,4,.62); backdrop-filter:blur(2px); z-index:30; padding:24px; }
+  #menuPop.on{ display:flex; }
+  .menuCard{ width:100%; max-width:258px; background:linear-gradient(180deg,#2a1f15,#1a120b); border:1px solid var(--panel-edge); border-radius:18px; padding:16px; box-shadow:0 18px 44px rgba(0,0,0,.55); display:flex; flex-direction:column; gap:9px; }
+  .menuTitle{ text-align:center; font-size:14px; font-weight:800; color:var(--ink); margin-bottom:2px; letter-spacing:.5px; }
+  .menuItem{ appearance:none; cursor:pointer; touch-action:manipulation; padding:11px; border-radius:11px; font-size:14px; font-weight:600; color:var(--ink);
+    background:linear-gradient(180deg,#322619,#1c1409); border:1px solid var(--panel-edge); box-shadow:0 3px 0 #150d06; transition:transform .07s, box-shadow .07s; }
+  .menuItem:active{ transform:translateY(2px); box-shadow:0 1px 0 #150d06; }
+  .menuItem.close{ background:linear-gradient(180deg,#9be87e,#6cc24f); color:#16240f; box-shadow:0 3px 0 #3f7d2c; }
+  .menuItem.close:active{ box-shadow:0 1px 0 #3f7d2c; }
+  .menuHelp{ display:none; font-size:11.5px; color:var(--muted); line-height:1.55; padding:8px 10px; background:#170f07; border-radius:9px; border:1px solid var(--panel-edge); }
+  .menuHelp.on{ display:block; }
 
   /* overlay / result */
   #overlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(8,10,16,.74); backdrop-filter:blur(3px); z-index:20; padding:24px; }
@@ -352,16 +365,12 @@
   <!-- ===== GAME ===== -->
   <section id="game">
     <div class="hud">
-      <div class="row">
-        <span class="stage-name" id="stageName">8×10 표준판</span>
+      <button class="menuBtn" id="menuBtn" aria-label="메뉴">⚙</button>
+      <div class="hudTop">
+        <span class="stage-name" id="stageName">1층 · 8×10</span>
+        <span class="hpmini">HP <b class="hh" id="hpNow">10</b>/<span id="hpMax">10</span></span>
         <span class="turn">턴 <b id="turnNum">0</b></span>
-      </div>
-      <div class="row">
-        <div class="hpwrap">
-          <div class="hpbar"><div class="hpfill" id="hpFill"></div></div>
-          <span class="hpnum">HP <span class="hh" id="hpNow">10</span> / <span id="hpMax">10</span></span>
-        </div>
-        <span class="qpill qa" id="qPill">품질 A</span>
+        <span class="qpill qa" id="qPill">A</span>
       </div>
       <div class="goalRow">
         <span class="gi" id="goalIcon"><span class="leafmini"></span></span>
@@ -382,8 +391,9 @@
             </div>
           </div></div>
           <div class="actor" id="slime">
-            <div class="inner"><div class="fig">
+            <div class="inner">
               <div class="gshadow"></div>
+              <div class="fig">
               <div class="sl-body"><div class="sl-eye l"></div><div class="sl-eye r"></div><div class="sl-mouth"></div></div>
               <div class="alertRing"></div>
               <div class="zzz"><span>z</span><span>z</span><span>z</span></div>
@@ -393,8 +403,9 @@
           </div>
           <div class="actor" id="player">
             <div class="glow"></div>
-            <div class="inner"><div class="fig">
+            <div class="inner">
               <div class="gshadow"></div>
+              <div class="fig">
               <div class="rise">
                 <div class="pl-cape"></div><div class="pl-pack"></div>
                 <div class="pl-arm l"></div><div class="pl-arm r"></div>
@@ -419,11 +430,17 @@
         <button class="dbtn dir" data-dir="right" aria-label="오른쪽 이동">▶</button>
         <button class="dbtn dir" data-dir="down" aria-label="아래로 이동">▼</button>
       </div>
-      <div class="subRow">
-        <button class="subBtn" id="restartBtn">재시작</button>
-        <button class="subBtn" id="homeBtn">처음으로</button>
+    </div>
+
+    <div id="menuPop">
+      <div class="menuCard">
+        <div class="menuTitle">메뉴</div>
+        <button class="menuItem" id="mRestart">재시작</button>
+        <button class="menuItem" id="mHome">처음으로</button>
+        <button class="menuItem" id="mHelp">조작 안내</button>
+        <div class="menuHelp" id="menuHelp">방향 패드(▲◀▶▼)로 이동·채집·밀치기·귀환을 모두 해. 한 번 누르면 한 턴, 막힌 방향은 턴이 지나지 않아. 보드의 칸을 직접 탭해도 같은 조작이 돼.</div>
+        <button class="menuItem close" id="mClose">닫기</button>
       </div>
-      <div class="hint">방향 패드 = <span>이동·채집·밀치기·귀환</span> · 막힌 방향은 턴이 지나지 않아</div>
     </div>
 
     <div id="overlay">
@@ -713,6 +730,8 @@ function renderActors(snap){
   slimeEl.classList.toggle("move-anim", !snap);
   playerEl.classList.remove("face-up","face-down","face-left","face-right");
   playerEl.classList.add("face-"+((S.player&&S.player.dir)||"down"));
+  playerEl.style.zIndex = 30 + S.player.r*2 + 1;                 // 아래 행일수록 앞 (같은 행이면 플레이어 우선)
+  if(S.slime.alive) slimeEl.style.zIndex = 30 + S.slime.r*2;
   place(playerEl, S.player.c, S.player.r);
   if(S.slime.alive) place(slimeEl, S.slime.c, S.slime.r);
 }
@@ -757,7 +776,8 @@ function updateGoal(){
   $("goalState").textContent = S.hasLeaf ? "목표: 출구로 귀환" : "목표: 반짝잎 채집";
   $("goalIcon").classList.toggle("collected", S.hasLeaf);
 }
-function syncHud(){ $("turnNum").textContent=S.turn; $("hpNow").textContent=S.player.hp; $("hpMax").textContent=S.player.maxhp; $("hpFill").style.width=(100*S.player.hp/S.player.maxhp)+"%"; }
+function syncHud(){ $("turnNum").textContent=S.turn; $("hpNow").textContent=S.player.hp; $("hpMax").textContent=S.player.maxhp;
+  const hh=$("hpNow"); if(hh) hh.style.color = S.player.hp<=3 ? "#ff5a6a" : S.player.hp<=6 ? "#ffb05e" : "#ff8a98"; }
 function pushLog(text){
   logLines.push(text); if(logLines.length>3) logLines=logLines.slice(-3);
   const ps=$("log").querySelectorAll("p"), shown=logLines.slice(-3);
@@ -819,10 +839,18 @@ window.addEventListener("orientationchange", ()=> setTimeout(layout,250));
 
 /* controls */
 $("waitBtn").addEventListener("click", endTurn);
-$("restartBtn").addEventListener("click", ()=>{ const k=keyFromCols(); if(k) startStage(k); });
-$("homeBtn").addEventListener("click", goHome);
 $("ovRetry").addEventListener("click", ()=>{ const k=keyFromCols(); if(k) startStage(k); });
 $("ovHome").addEventListener("click", goHome);
+
+/* 설정/메뉴 팝업 (재시작·처음으로·조작안내) */
+function openMenu(){ $("menuPop").classList.add("on"); $("menuHelp").classList.remove("on"); }
+function closeMenu(){ $("menuPop").classList.remove("on"); }
+$("menuBtn").addEventListener("click", openMenu);
+$("mClose").addEventListener("click", closeMenu);
+$("mRestart").addEventListener("click", ()=>{ closeMenu(); const k=keyFromCols(); if(k) startStage(k); });
+$("mHome").addEventListener("click", ()=>{ closeMenu(); goHome(); });
+$("mHelp").addEventListener("click", ()=>{ $("menuHelp").classList.toggle("on"); });
+$("menuPop").addEventListener("click", e=>{ if(e.target.id==="menuPop") closeMenu(); });
 
 /* ===== 하단 4방향 패드 (기본 조작) ===== */
 function dirDelta(d){ return d==="up"?[0,-1]:d==="down"?[0,1]:d==="left"?[-1,0]:[1,0]; }
