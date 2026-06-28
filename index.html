@@ -28,7 +28,7 @@
     overflow:hidden; user-select:none; -webkit-user-select:none;
   }
   #app{ position:relative; height:100vh; height:100dvh; max-width:460px; margin:0 auto;
-    display:flex; flex-direction:column; padding:9px 12px calc(8px + env(safe-area-inset-bottom)); }
+    display:flex; flex-direction:column; padding:8px 5px calc(7px + env(safe-area-inset-bottom)); }
 
   /* ---------- TITLE ---------- */
   #title{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:15px; padding:24px 22px; text-align:center; }
@@ -52,7 +52,7 @@
   .sizeBtn .tag{ font-size:11.5px; color:var(--muted); text-align:right; max-width:50%; }
 
   /* ---------- GAME ---------- */
-  #game{ display:none; flex-direction:column; height:100%; gap:7px; }
+  #game{ display:none; flex-direction:column; height:100%; gap:5px; }
   #game.on{ display:flex; }
   .hud{ position:relative; background:linear-gradient(180deg,#2a1f15,#19110a); border:1px solid var(--panel-edge); border-radius:12px;
     padding:7px 11px; display:flex; flex-direction:column; gap:3px; box-shadow:0 3px 8px rgba(0,0,0,.3); }
@@ -74,7 +74,7 @@
 
   /* board + frame */
   #boardWrap{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; perspective:950px; perspective-origin:50% 38%; }
-  #frame{ position:relative; display:inline-block; padding:15px; border-radius:22px;
+  #frame{ position:relative; display:inline-block; padding:9px; border-radius:18px;
     transform:rotateX(6deg); transform-origin:50% 58%;
     background:linear-gradient(180deg, var(--rim-top) 0%, var(--rim-mid) 46%, var(--rim-bot) 100%);
     box-shadow:0 22px 48px rgba(0,0,0,.62), 0 6px 18px rgba(0,0,0,.5), 0 0 40px rgba(255,150,70,.10),
@@ -159,9 +159,9 @@
   .actor .glow{ position:absolute; left:8%; bottom:6%; width:84%; height:46%; background:radial-gradient(50% 100% at 50% 100%, rgba(255,236,170,.5), transparent 70%); z-index:0; }
   .actor .inner{ position:absolute; inset:0; z-index:1; }
   .fig{ position:absolute; inset:0; }
-  #player .fig{ transform:scale(1.28); transform-origin:50% 86%; }
-  #slime .fig{ transform:scale(1.24); transform-origin:50% 80%; }
-  .gshadow{ position:absolute; left:16%; bottom:5%; width:68%; height:16%; background:radial-gradient(50% 100% at 50% 50%, rgba(0,0,0,.6), transparent 70%); }
+  #player .fig{ transform:scale(1.35); transform-origin:50% 88%; }
+  #slime .fig{ transform:scale(1.30); transform-origin:50% 82%; }
+  .gshadow{ position:absolute; left:15%; bottom:4%; width:70%; height:17%; background:radial-gradient(50% 100% at 50% 50%, rgba(0,0,0,.66), transparent 68%); }
   .rise{ position:absolute; inset:0; animation:bob 2.4s ease-in-out infinite; }
   @keyframes bob{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6%)} }
   /* ===== 견습 연금술사 피규어 ===== */
@@ -378,6 +378,8 @@
       </div>
     </div>
 
+    <div class="log" id="log"><p>　</p><p>　</p><p class="last">　</p></div>
+
     <div id="boardWrap">
       <div id="frame">
         <span class="stud tl"></span><span class="stud tr"></span><span class="stud bl"></span><span class="stud br"></span>
@@ -417,8 +419,6 @@
         </div>
       </div>
     </div>
-
-    <div class="log" id="log"><p>　</p><p>　</p><p class="last">　</p></div>
 
     <div class="controls">
       <div class="dpad">
@@ -536,10 +536,10 @@ function buildBoard(){
     for(let c=0;c<S.cols;c++){
       const t=S.terrain[r][c], alt=((c+r)%2)?" alt":"";
       const cell=document.createElement("div");
-      if(t==="exit"){ cell.className="cell floor"+alt; cell.innerHTML='<div class="exitArt"><span class="lantern"></span><span class="knob"></span></div><div class="exitLbl">출구</div>'; }
+      if(t==="exit"){ cell.className="cell floor"+alt; cell.innerHTML='<div class="exitArt" style="z-index:'+(20+r*2-1)+'"><span class="lantern"></span><span class="knob"></span></div><div class="exitLbl">출구</div>'; }
       else if(t==="rock"){ cell.className="cell floor"+alt;
         const rv=((c*3+r*7)%3), rc=(rv===1?" r2":rv===2?" r3":"");
-        cell.innerHTML='<div class="rockArt'+rc+'"></div>'; }
+        cell.innerHTML='<div class="rockArt'+rc+'" style="z-index:'+(20+r*2-1)+'"></div>'; }
       else { cell.className="cell floor"+alt; }
       cell.dataset.c=c; cell.dataset.r=r;
       frag.appendChild(cell);
@@ -730,12 +730,12 @@ function renderActors(snap){
   slimeEl.classList.toggle("move-anim", !snap);
   playerEl.classList.remove("face-up","face-down","face-left","face-right");
   playerEl.classList.add("face-"+((S.player&&S.player.dir)||"down"));
-  playerEl.style.zIndex = 30 + S.player.r*2 + 1;                 // 아래 행일수록 앞 (같은 행이면 플레이어 우선)
-  if(S.slime.alive) slimeEl.style.zIndex = 30 + S.slime.r*2;
+  playerEl.style.zIndex = 20 + S.player.r*2 + 1;                 // 통합 row depth: 아래 행일수록 앞
+  if(S.slime.alive) slimeEl.style.zIndex = 20 + S.slime.r*2;
   place(playerEl, S.player.c, S.player.r);
   if(S.slime.alive) place(slimeEl, S.slime.c, S.slime.r);
 }
-function renderLeaf(){ if(!S.leaf.collected) place(leafEl, S.leaf.c, S.leaf.r); }
+function renderLeaf(){ if(!S.leaf.collected){ leafEl.style.zIndex = 20 + S.leaf.r*2; place(leafEl, S.leaf.c, S.leaf.r); } }
 function renderMarkers(){
   markersEl.innerHTML=""; if(S.status!=="play") return;
   const p=S.player, dirs=[[0,-1],[0,1],[-1,0],[1,0]];
@@ -821,14 +821,14 @@ function endGame(win){
 }
 
 /* layout (decorative frame padding excluded from grid) */
-const FRAME_PAD=13;
+const FRAME_PAD=9;
 function layout(){
   if(!S) return;
   const wrap=$("boardWrap");
   const availW=wrap.clientWidth  - FRAME_PAD*2 - 8;
   const availH=wrap.clientHeight - FRAME_PAD*2 - 8;
   let t=Math.floor(Math.min(availW/S.cols, availH/S.rows));
-  t=Math.max(34, Math.min(58, t));
+  t=Math.max(38, Math.min(66, t));
   tile=t; document.documentElement.style.setProperty("--tile", t+"px");
   boardEl.style.width=(t*S.cols)+"px"; boardEl.style.height=(t*S.rows)+"px";
   renderActors(true); renderLeaf(); renderMarkers();
