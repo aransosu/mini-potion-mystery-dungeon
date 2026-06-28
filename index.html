@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>미궁 포션 가게 · 기절 02C</title>
+<style>
+  :root{
+    /* 따뜻한 판타지 던전 — 어둠 속에서 빛나는 작은 돌무대 */
+    --bg1:#1a130d; --bg2:#090605;
+    --panel:#241a12; --panel-edge:#3d2f20;
+    --ink:#f3ead9; --muted:#b29c80; --faint:#7c6a52;
+    --floor-a:#5a4938; --floor-b:#4f4031; --grout:#291f14;
+    --rim-top:#806c53; --rim-mid:#52412f; --rim-bot:#32251a; --rim-edge:#180f08;
+    --leaf:#7fe6a0; --door:#ffc879; --door-dk:#a9762f;
+    --move:#7fe0c0; --attack:#ff9f6b;
+    --accent:#8fd96a;
+    --torch:#ffb15e; --torch-dk:#ff8a3c; --moss:#84b052; --moss-dk:#55792f;
+    --qa:#ffd56b; --qb:#e8dcc4; --qc:#d49a5e;
+    --tile:44px;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; height:100%; }
+  body{
+    font-family:"Trebuchet MS","Segoe UI",-apple-system,system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    color:var(--ink);
+    background:radial-gradient(125% 92% at 50% -8%, #3d2c19 0%, var(--bg1) 40%, var(--bg2) 100%);
+    overflow:hidden; user-select:none; -webkit-user-select:none;
+  }
+  #app{ position:relative; height:100vh; height:100dvh; max-width:460px; margin:0 auto;
+    display:flex; flex-direction:column; padding:9px 12px calc(8px + env(safe-area-inset-bottom)); }
+
+  /* ---------- TITLE ---------- */
+  #title{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:15px; padding:24px 22px; text-align:center; }
+  .crest{ width:78px; height:78px; position:relative; margin-bottom:2px; }
+  .crest .jar{ position:absolute; left:50%; bottom:6px; transform:translateX(-50%); width:46px; height:50px;
+    background:linear-gradient(160deg,rgba(180,235,200,.85),rgba(120,200,150,.7)); border-radius:18px 18px 22px 22px;
+    box-shadow:inset -4px -4px 8px rgba(40,120,80,.4), inset 4px 4px 8px rgba(255,255,255,.4), 0 8px 16px rgba(0,0,0,.45); }
+  .crest .jar::before{ content:""; position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:22px; height:12px; background:#7a5230; border-radius:4px 4px 2px 2px; }
+  .crest .spark{ position:absolute; width:8px; height:8px; background:radial-gradient(circle,#fff,rgba(255,230,150,0)); border-radius:50%; animation:tw 1.8s ease-in-out infinite; }
+  .crest .spark.s1{ left:8px; top:14px; } .crest .spark.s2{ right:6px; top:26px; animation-delay:.6s; } .crest .spark.s3{ left:50%; top:0; animation-delay:1.1s; }
+  @keyframes tw{ 0%,100%{transform:scale(.4); opacity:.2} 50%{transform:scale(1.1); opacity:1} }
+  #title h1{ margin:0; font-size:24px; letter-spacing:.5px; font-weight:700; text-shadow:0 2px 0 rgba(0,0,0,.35); }
+  #title .sub{ margin:0; color:var(--muted); font-size:13px; line-height:1.55; max-width:20em; }
+  #title .sub b{ color:#bfead0; font-weight:600; }
+  .sizes{ width:100%; max-width:300px; display:flex; flex-direction:column; gap:12px; margin-top:6px; }
+  .sizeBtn{ appearance:none; border:1px solid var(--panel-edge); background:linear-gradient(180deg,#2c2117,#1a120b); color:var(--ink);
+    border-radius:16px; padding:15px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    cursor:pointer; touch-action:manipulation; box-shadow:0 6px 0 #150d06, 0 9px 14px rgba(0,0,0,.35); transition:transform .08s, box-shadow .08s; }
+  .sizeBtn:active{ transform:translateY(4px); box-shadow:0 2px 0 #150d06, 0 4px 8px rgba(0,0,0,.3); }
+  .sizeBtn .big{ font-size:18px; font-weight:700; letter-spacing:.4px; }
+  .sizeBtn .tag{ font-size:11.5px; color:var(--muted); text-align:right; max-width:50%; }
+
+  /* ---------- GAME ---------- */
+  #game{ display:none; flex-direction:column; height:100%; gap:7px; }
+  #game.on{ display:flex; }
+  .hud{ background:linear-gradient(180deg,#2a1f15,#19110a); border:1px solid var(--panel-edge); border-radius:14px;
+    padding:8px 11px; display:flex; flex-direction:column; gap:6px; box-shadow:0 3px 8px rgba(0,0,0,.3); }
+  .hud .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .stage-name{ font-size:13.5px; font-weight:700; letter-spacing:.3px; }
+  .turn{ font-size:12px; color:var(--muted); } .turn b{ color:#cdd3ea; font-variant-numeric:tabular-nums; }
+  .hpwrap{ display:flex; align-items:center; gap:8px; flex:1; }
+  .hpbar{ flex:1; height:9px; border-radius:6px; background:#140c06; overflow:hidden; border:1px solid #2a3043; }
+  .hpfill{ height:100%; width:100%; border-radius:5px; background:linear-gradient(90deg,#ff6a7d,#ff97a4); transition:width .25s ease; }
+  .hpnum{ font-size:12px; color:#ffd2d8; font-variant-numeric:tabular-nums; min-width:60px; text-align:right; }
+  .hpnum .hh{ color:#ff8a98; }
+  .qpill{ font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; border:1px solid var(--panel-edge); white-space:nowrap;
+    background:#170f07; letter-spacing:.3px; }
+  .qpill.qa{ color:var(--qa); border-color:rgba(255,213,107,.5); box-shadow:0 0 8px rgba(255,213,107,.25); }
+  .qpill.qb{ color:var(--qb); } .qpill.qc{ color:var(--qc); border-color:rgba(207,148,102,.5); }
+  .goalRow{ display:flex; align-items:center; gap:7px; font-size:12px; color:#cdd3ea; }
+  .goalRow .gi{ width:14px; height:14px; flex:none; position:relative; }
+  .gi .leafmini{ position:absolute; inset:0; background:linear-gradient(150deg,#a9f0c2,#5fc585); border-radius:0 60% 0 60%; transform:rotate(45deg); box-shadow:0 0 6px rgba(127,230,160,.6); }
+  .gi.collected::after{ content:"✓"; position:absolute; right:-4px; bottom:-4px; font-size:10px; color:#1f2a22; background:var(--accent); border-radius:50%; width:11px; height:11px; line-height:11px; text-align:center; font-weight:900; }
+
+  /* board + frame */
+  #boardWrap{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; perspective:950px; perspective-origin:50% 38%; }
+  #frame{ position:relative; display:inline-block; padding:15px; border-radius:22px;
+    transform:rotateX(6deg); transform-origin:50% 58%;
+    background:linear-gradient(180deg, var(--rim-top) 0%, var(--rim-mid) 46%, var(--rim-bot) 100%);
+    box-shadow:0 22px 48px rgba(0,0,0,.62), 0 6px 18px rgba(0,0,0,.5), 0 0 40px rgba(255,150,70,.10),
+      inset 0 3px 0 rgba(255,236,200,.14), inset 0 -10px 16px rgba(0,0,0,.6), 0 0 0 1px var(--rim-edge); }
+  #frame::before{ content:""; position:absolute; inset:4px; border-radius:18px; pointer-events:none;
+    background:repeating-linear-gradient(90deg, transparent 0 30px, rgba(0,0,0,.12) 30px 32px), repeating-linear-gradient(0deg, transparent 0 30px, rgba(0,0,0,.12) 30px 32px);
+    -webkit-mask:linear-gradient(#000,#000) content-box, linear-gradient(#000,#000); -webkit-mask-composite:xor; mask-composite:exclude; padding:12px; opacity:.5; }
+  .stud{ position:absolute; width:13px; height:13px; border-radius:4px; z-index:3;
+    background:radial-gradient(circle at 35% 30%, #9c8460, #463826 72%);
+    box-shadow:inset 0 -1px 2px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,230,190,.4), 0 1px 2px rgba(0,0,0,.55); }
+  .stud::after{ content:""; position:absolute; inset:28%; border-radius:50%; background:radial-gradient(circle at 40% 35%, #ffdca6, #8a6a42); box-shadow:inset 0 -1px 1px rgba(0,0,0,.4); }
+  .stud.tl{ top:6px; left:6px; } .stud.tr{ top:6px; right:6px; } .stud.bl{ bottom:6px; left:6px; } .stud.br{ bottom:6px; right:6px; }
+  #board{ position:relative; display:grid; border-radius:10px; overflow:hidden; background:var(--grout); box-shadow:0 0 0 3px var(--rim-edge), inset 0 4px 14px rgba(0,0,0,.62); }
+  #board::after{ content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:radial-gradient(120% 78% at 50% -6%, rgba(255,172,92,.13), transparent 46%),
+      linear-gradient(180deg, rgba(255,182,112,.06) 0%, transparent 24%, transparent 72%, rgba(0,0,0,.30) 100%),
+      radial-gradient(145% 125% at 50% 48%, transparent 56%, rgba(0,0,0,.42) 100%); }
+  .cell{ width:var(--tile); height:var(--tile); position:relative; touch-action:manipulation; }
+  .cell.floor{ background:radial-gradient(120% 100% at 50% 0%, rgba(255,210,150,.05), transparent 58%), var(--floor-a);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.24); }
+  .cell.floor.alt{ background:radial-gradient(120% 100% at 50% 0%, rgba(255,210,150,.04), transparent 58%), var(--floor-b); }
+  .cell.floor::after{ content:""; position:absolute; inset:1px; border-radius:3px;
+    background:linear-gradient(158deg, rgba(255,236,200,.07) 0%, transparent 40%, rgba(0,0,0,.12) 100%);
+    box-shadow:inset 0 1px 1px rgba(255,225,180,.06), inset 0 -2px 3px rgba(0,0,0,.20); }
+
+  .rockArt{ position:absolute; left:14%; bottom:14%; width:72%; height:66%; z-index:2;
+    border-radius:48% 52% 46% 54% / 56% 54% 46% 44%;
+    background:radial-gradient(58% 50% at 40% 28%, #b0a088 0%, #7d6e58 50%, #4f4334 100%);
+    box-shadow:inset 0 -6px 8px rgba(0,0,0,.45), inset 0 3px 5px rgba(255,236,200,.18), 0 4px 6px rgba(0,0,0,.4); }
+  .rockArt::before{ content:""; position:absolute; left:-8%; bottom:-14%; width:116%; height:34%; z-index:-1;
+    background:radial-gradient(50% 100% at 50% 50%, rgba(0,0,0,.5), transparent 72%); }
+  .rockArt::after{ content:""; position:absolute; left:16%; top:14%; width:34%; height:26%; border-radius:50% 40% 46% 50%;
+    background:radial-gradient(circle at 40% 35%, var(--moss), var(--moss-dk) 68%, transparent 80%); opacity:.8; }
+  .rockArt.r2{ width:62%; height:56%; left:19%; border-radius:54% 46% 50% 50% / 50% 52% 48% 50%;
+    background:radial-gradient(56% 52% at 42% 30%, #a89880, #6f6150 52%, #463a2d 100%); }
+  .rockArt.r2::after{ left:50%; top:22%; width:24%; height:19%; }
+  .rockArt.r3{ width:78%; height:60%; left:11%; border-radius:44% 56% 52% 48% / 60% 50% 50% 40%;
+    background:radial-gradient(60% 50% at 38% 26%, #b6a488, #806f57 50%, #524432 100%); }
+  .rockArt.r3::after{ left:22%; top:46%; width:21%; height:17%; opacity:.62; }
+
+  /* exit = shop door (돌아갈 곳) */
+  .exitArt{ position:absolute; inset:11% 16%; border-radius:50% 50% 10% 10% / 42% 42% 8% 8%; overflow:hidden;
+    background:linear-gradient(180deg,#6b4a2e 0%,#4a3120 100%);
+    box-shadow:0 0 0 2px rgba(0,0,0,.4), 0 0 16px rgba(216,176,99,.45), inset 0 0 0 2px rgba(255,210,130,.25); }
+  .exitArt::before{ content:""; position:absolute; left:14%; right:14%; bottom:0; top:22%; border-radius:50% 50% 6% 6% / 30% 30% 6% 6%;
+    background:radial-gradient(60% 80% at 50% 100%, #ffe6ad 0%, #f0b85e 45%, #8a5f2c 100%); }
+  .exitArt .knob{ position:absolute; left:50%; top:54%; transform:translateX(-50%); width:9%; height:9%; background:#3a2715; border-radius:50%; z-index:2; box-shadow:0 0 3px rgba(0,0,0,.6); }
+  .exitArt .lantern{ position:absolute; left:50%; top:6%; transform:translateX(-50%); width:18%; height:14%; border-radius:50%;
+    background:radial-gradient(circle,#fff1c2,#ffba52 70%,transparent); animation:lant 2.2s ease-in-out infinite; z-index:2; }
+  @keyframes lant{ 0%,100%{opacity:.7} 50%{opacity:1} }
+  #board.has-leaf .exitArt{ box-shadow:0 0 0 2px rgba(0,0,0,.4), 0 0 22px rgba(255,205,110,.8), inset 0 0 0 2px rgba(255,220,150,.5); animation:doorcall 1.4s ease-in-out infinite; }
+  @keyframes doorcall{ 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.25)} }
+  .exitLbl{ position:absolute; bottom:-2px; left:0; right:0; text-align:center; font-size:9px; color:#ffe2a8; text-shadow:0 1px 2px #000; letter-spacing:2px; pointer-events:none; }
+
+  /* markers */
+  #markers{ position:absolute; inset:0; pointer-events:none; z-index:3; }
+  .mk{ position:absolute; width:var(--tile); height:var(--tile); display:flex; align-items:center; justify-content:center; }
+  .mk .movedot{ width:30%; height:30%; border-radius:50%; background:radial-gradient(circle at 50% 40%, #d6eeff, var(--move)); box-shadow:0 0 10px rgba(143,208,255,.8); animation:pulse 1.1s ease-in-out infinite; }
+  .mk.atk .ring{ position:absolute; inset:8%; border-radius:12px; border:2px solid var(--attack); box-shadow:0 0 12px rgba(255,159,107,.55), inset 0 0 10px rgba(255,159,107,.3); animation:pulse .9s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:.55; transform:scale(.92)} 50%{opacity:1; transform:scale(1.04)} }
+
+  /* leaf (collectible) */
+  #leaf{ position:absolute; left:0; top:0; width:var(--tile); height:var(--tile); z-index:4; pointer-events:none; }
+  .leafArt{ position:absolute; inset:0; }
+  .leafArt .halo{ position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:84%; height:84%; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,242,182,.42) 0%, rgba(127,230,160,.42) 42%, transparent 70%); animation:halo 2s ease-in-out infinite; }
+  @keyframes halo{ 0%,100%{opacity:.5; transform:translate(-50%,-50%) scale(.85)} 50%{opacity:.95; transform:translate(-50%,-50%) scale(1.05)} }
+  .leafArt .lift{ position:absolute; inset:0; animation:bob 2.6s ease-in-out infinite; }
+  .leafArt .leaf1{ position:absolute; left:30%; top:30%; width:40%; height:46%; border-radius:0 75% 0 75%; transform:rotate(38deg);
+    background:linear-gradient(150deg,#c7f7d8 0%,#7fe6a0 45%,#3fb873 100%); box-shadow:inset -2px -2px 4px rgba(30,120,70,.4), 0 2px 4px rgba(0,0,0,.3); }
+  .leafArt .leaf1::after{ content:""; position:absolute; left:48%; top:14%; width:6%; height:70%; background:rgba(255,255,255,.55); border-radius:2px; transform:rotate(-6deg); }
+  .leafArt .leaf2{ position:absolute; left:20%; top:46%; width:26%; height:30%; border-radius:0 75% 0 75%; transform:rotate(20deg);
+    background:linear-gradient(150deg,#a9f0c2,#56c483); box-shadow:inset -1px -1px 3px rgba(30,120,70,.4); }
+  .leafArt .sp{ position:absolute; width:18%; height:18%; background:
+      linear-gradient(#fff,#fff) center/100% 22% no-repeat, linear-gradient(#fff,#fff) center/22% 100% no-repeat;
+      filter:drop-shadow(0 0 3px #d8ffe6); animation:tw 1.6s ease-in-out infinite; }
+  .leafArt .sp.a{ left:60%; top:18%; } .leafArt .sp.b{ left:18%; top:30%; width:12%; height:12%; animation-delay:.7s; } .leafArt .sp.c{ left:64%; top:60%; width:13%; height:13%; animation-delay:1.1s; }
+
+  /* actors */
+  .actor{ position:absolute; left:0; top:0; width:var(--tile); height:var(--tile); z-index:5; pointer-events:none; will-change:transform; }
+  .actor.move-anim{ transition:transform .15s cubic-bezier(.4,.9,.4,1); }
+  .actor .glow{ position:absolute; left:8%; bottom:6%; width:84%; height:46%; background:radial-gradient(50% 100% at 50% 100%, rgba(255,236,170,.5), transparent 70%); z-index:0; }
+  .actor .inner{ position:absolute; inset:0; z-index:1; }
+  .fig{ position:absolute; inset:0; }
+  .gshadow{ position:absolute; left:18%; bottom:6%; width:64%; height:15%; background:radial-gradient(50% 100% at 50% 50%, rgba(0,0,0,.56), transparent 72%); }
+  .rise{ position:absolute; inset:0; animation:bob 2.4s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6%)} }
+  /* ===== 견습 연금술사 피규어 ===== */
+  .pl-cape{ position:absolute; left:23%; bottom:13%; width:54%; height:46%; z-index:0;
+    background:linear-gradient(168deg,#b8632f,#8c481f); border-radius:46% 46% 30% 34%; box-shadow:inset 0 -3px 5px rgba(0,0,0,.3); }
+  .pl-pack{ position:absolute; left:31%; bottom:22%; width:38%; height:30%; z-index:1; opacity:0; transition:opacity .12s;
+    background:linear-gradient(#7d5431,#5a3a20); border-radius:34% 34% 26% 26%; box-shadow:inset 0 -2px 3px rgba(0,0,0,.3); }
+  .pl-pack::after{ content:""; position:absolute; left:18%; top:30%; width:64%; height:13%; background:rgba(0,0,0,.25); border-radius:2px; }
+  .pl-arm{ position:absolute; bottom:27%; width:9%; height:17%; background:#cf6038; border-radius:5px; z-index:2; transition:opacity .12s; }
+  .pl-arm.l{ left:25%; transform:rotate(8deg); } .pl-arm.r{ right:25%; transform:rotate(-8deg); }
+  .pl-body{ position:absolute; left:28%; bottom:17%; width:44%; height:40%; z-index:2;
+    background:linear-gradient(160deg,#f0855a,#c2562f); border-radius:46% 46% 34% 34%; box-shadow:inset 3px -3px 4px rgba(0,0,0,.22), inset -2px 2px 3px rgba(255,255,255,.22); }
+  .pl-apron{ position:absolute; left:36%; bottom:18%; width:28%; height:30%; z-index:3; transition:opacity .12s;
+    background:linear-gradient(#ecd9b4,#cbb083); border-radius:28% 28% 22% 22%; box-shadow:inset 0 2px 2px rgba(255,255,255,.3), inset 0 -2px 3px rgba(120,90,50,.3); }
+  .pl-potion{ position:absolute; left:55%; bottom:25%; width:11%; height:16%; z-index:4; transition:opacity .12s, left .12s;
+    background:linear-gradient(#9be8d0,#54bd9c); border-radius:38% 38% 50% 50%; box-shadow:inset 0 -2px 2px rgba(0,80,60,.35), 0 0 4px rgba(120,230,180,.4); }
+  .pl-potion::before{ content:""; position:absolute; left:34%; top:-20%; width:32%; height:26%; background:#6b4a2e; border-radius:2px; }
+  .pl-head{ position:absolute; left:34%; bottom:47%; width:32%; height:30%; z-index:5;
+    background:radial-gradient(60% 60% at 42% 36%, #ffe2bb, #e6b585); border-radius:50%; box-shadow:inset -2px -2px 3px rgba(0,0,0,.16); }
+  .pl-face{ position:absolute; left:0; bottom:53%; width:100%; height:13%; z-index:6; transition:opacity .12s; }
+  .pl-face::before, .pl-face::after{ content:""; position:absolute; bottom:0; width:7%; height:64%; background:#3a2a1a; border-radius:50%; }
+  .pl-face::before{ left:41%; } .pl-face::after{ right:41%; }
+  .pl-hat{ position:absolute; left:27%; bottom:62%; width:46%; height:15%; z-index:7;
+    background:linear-gradient(#7a5a8e,#573c6a); border-radius:50% 50% 44% 44%; box-shadow:inset 0 -2px 2px rgba(0,0,0,.25); }
+  .pl-hat::after{ content:""; position:absolute; left:31%; top:-72%; width:38%; height:118%;
+    background:linear-gradient(#7a5a8e,#573c6a); border-radius:48% 48% 30% 30%; transform:rotate(-3deg); transform-origin:bottom; }
+  .pl-hat::before{ content:""; position:absolute; left:60%; top:-58%; width:13%; height:13%; z-index:1;
+    background:radial-gradient(circle,#ffe9a0,#f5c24a); border-radius:50%; box-shadow:0 0 4px rgba(255,210,90,.7); }
+  /* ===== 4방향 (마지막 이동 방향) ===== */
+  #player.face-down .pl-cape{ opacity:.45; }
+  #player.face-up .pl-face{ opacity:0; }
+  #player.face-up .pl-apron{ opacity:0; }
+  #player.face-up .pl-potion{ opacity:.55; left:33%; }
+  #player.face-up .pl-pack{ opacity:1; z-index:4; bottom:26%; }
+  #player.face-up .pl-head{ background:radial-gradient(60% 60% at 50% 42%, #f0d2aa, #d6a676); }
+  #player.face-up .pl-hat::after{ transform:rotate(0); }
+  #player.face-up .pl-hat::before{ left:44%; top:-50%; }
+  #player.face-left .pl-face::after, #player.face-right .pl-face::before{ opacity:0; }
+  #player.face-left .pl-face::before{ left:34%; } #player.face-right .pl-face::after{ right:34%; }
+  #player.face-left .pl-arm.r, #player.face-right .pl-arm.l{ opacity:0; }
+  #player.face-left .pl-arm.l{ left:42%; } #player.face-right .pl-arm.r{ right:42%; }
+  #player.face-left .pl-pack{ opacity:.8; left:52%; width:26%; z-index:4; }
+  #player.face-right .pl-pack{ opacity:.8; left:22%; width:26%; z-index:4; }
+  #player.face-left .pl-potion{ left:32%; } #player.face-right .pl-potion{ left:57%; }
+  #player.face-left .pl-apron, #player.face-right .pl-apron{ width:24%; left:38%; }
+  .sl-body{ position:absolute; left:18%; bottom:13%; width:64%; height:52%; background:radial-gradient(60% 55% at 38% 30%, #b6f08a 0%, #7ed957 45%, #4faa3c 100%); border-radius:50% 50% 46% 46%; box-shadow:inset 0 -5px 8px rgba(28,90,20,.45), 0 2px 4px rgba(0,0,0,.25); transform-origin:50% 100%; animation:squish 1.8s ease-in-out infinite; z-index:2; }
+  .sl-body::before{ content:""; position:absolute; left:18%; top:14%; width:30%; height:26%; background:radial-gradient(circle, rgba(255,255,255,.85), transparent 70%); border-radius:50%; }
+  @keyframes squish{ 0%,100%{transform:scaleY(1) scaleX(1)} 50%{transform:scaleY(.9) scaleX(1.08)} }
+  .sl-eye{ position:absolute; bottom:34%; width:11%; height:15%; background:#16331a; border-radius:50%; z-index:3; }
+  .sl-eye.l{ left:36%; } .sl-eye.r{ right:36%; }
+  .sl-eye::after{ content:""; position:absolute; left:18%; top:14%; width:42%; height:42%; background:#eafff0; border-radius:50%; }
+  .sl-mouth{ position:absolute; left:46%; bottom:28%; width:8%; height:5%; border-bottom:2px solid #1c4022; border-radius:0 0 60% 60%; z-index:3; }
+
+  /* ambush states */
+  .alertRing{ position:absolute; left:14%; bottom:9%; width:72%; height:58%; border-radius:50% 50% 46% 46%; border:2px solid transparent; z-index:4; pointer-events:none; }
+  #slime.stirring .alertRing{ border-color:rgba(255,206,80,.9); box-shadow:0 0 12px rgba(255,196,70,.6), inset 0 0 9px rgba(255,196,70,.35); animation:alertpulse 1s ease-in-out infinite; }
+  @keyframes alertpulse{ 0%,100%{opacity:.45; transform:scale(.97)} 50%{opacity:1; transform:scale(1.03)} }
+  #slime.woke-flash .alertRing{ border-color:#ffd24a; box-shadow:0 0 20px 5px rgba(255,200,70,.9); animation:wakeflash .5s ease forwards; }
+  @keyframes wakeflash{ 0%{opacity:1; transform:scale(.85)} 100%{opacity:0; transform:scale(1.5)} }
+  #slime.sleeping .sl-body{ animation:breathe 3.2s ease-in-out infinite; filter:saturate(.82) brightness(.93); }
+  #slime.awake .sl-body{ animation:battleIdle 1.25s ease-in-out infinite; }
+  @keyframes battleIdle{ 0%,100%{transform:scaleY(1) scaleX(1)} 28%{transform:scaleY(.9) scaleX(1.1)} 56%{transform:scaleY(1.06) scaleX(.95)} }
+  @keyframes breathe{ 0%,100%{transform:scaleY(.93) scaleX(1.05)} 50%{transform:scaleY(.85) scaleX(1.12)} }
+  #slime.sleeping .sl-eye{ height:3.5%; bottom:36%; border-radius:2px; }
+  #slime.sleeping .sl-eye::after{ display:none; }
+  #slime.sleeping .sl-mouth{ width:11%; bottom:30%; opacity:.55; }
+  .zzz{ position:absolute; right:10%; top:2%; width:40%; height:46%; display:none; z-index:6; pointer-events:none; }
+  #slime.sleeping .zzz{ display:block; }
+  .zzz span{ position:absolute; font-weight:800; color:#cfe9ff; text-shadow:0 1px 2px rgba(0,0,0,.5); animation:zfloat 2.8s ease-in-out infinite; }
+  .zzz span:nth-child(1){ right:0;  top:62%; font-size:9px;  animation-delay:0s; }
+  .zzz span:nth-child(2){ right:26%; top:30%; font-size:11px; animation-delay:.6s; }
+  .zzz span:nth-child(3){ right:52%; top:0;   font-size:13px; animation-delay:1.2s; }
+  @keyframes zfloat{ 0%{opacity:0; transform:translateY(5px)} 35%{opacity:1} 100%{opacity:0; transform:translateY(-7px)} }
+  .wake{ position:absolute; z-index:8; font-weight:900; font-size:16px; color:#ffd24a; pointer-events:none; text-shadow:0 2px 3px #000; animation:rise-fade .8s ease forwards; }
+
+  /* ---- stunned (기절: 죽지 않고 납작하게 뻗어 칸을 막음, 4턴 뒤 회복) ---- */
+  .sl-body{ transition:transform .26s cubic-bezier(.34,1.3,.5,1), filter .26s ease; }
+  #slime.stunned .sl-body{ animation:wobble 2.4s ease-in-out infinite; transform:scaleY(.66) scaleX(1.2); filter:saturate(.97) brightness(1.05); border-radius:50% 50% 48% 48%; }
+  @keyframes wobble{ 0%,100%{transform:scaleY(.66) scaleX(1.2)} 50%{transform:scaleY(.63) scaleX(1.24)} }
+  #slime.stunned .sl-body::before{ opacity:.5; }
+  #slime.stunned .sl-eye{ width:15%; height:16%; bottom:40%; background:none; border:2px solid #16331a; border-radius:50%; }
+  #slime.stunned .sl-eye::after{ content:""; display:block; position:absolute; left:50%; top:50%; width:3px; height:3px; background:#16331a; border-radius:50%; transform:translate(-50%,-50%); }
+  #slime.stunned .sl-eye.l{ left:33%; } #slime.stunned .sl-eye.r{ right:33%; }
+  #slime.stunned .sl-mouth{ width:13%; bottom:24%; left:44%; border-bottom-width:2px; opacity:.7; }
+  #slime.stunned .alertRing{ border-color:transparent !important; box-shadow:none !important; animation:none !important; }
+  .stunStars{ position:absolute; left:50%; top:2%; width:54%; height:32%; transform:translateX(-50%); display:none; z-index:7; pointer-events:none; }
+  #slime.stunned .stunStars{ display:block; animation:stunspin 1.5s linear infinite; }
+  @keyframes stunspin{ from{transform:translateX(-50%) rotate(0)} to{transform:translateX(-50%) rotate(360deg)} }
+  .stunStars span{ position:absolute; background:
+      linear-gradient(#ffe27d,#ffe27d) center/100% 26% no-repeat, linear-gradient(#ffe27d,#ffe27d) center/26% 100% no-repeat;
+      filter:drop-shadow(0 0 3px #ffd24a); }
+  .stunStars span:nth-child(1){ left:37%; top:-8%; width:26%; height:52%; }
+  .stunStars span:nth-child(2){ left:4%;  top:46%; width:18%; height:36%; }
+  .stunStars span:nth-child(3){ left:72%; top:48%; width:17%; height:34%; }
+  .stunBadge{ position:absolute; right:0%; top:-6%; min-width:30%; height:30%; padding:0 2px; display:none; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 40% 32%, #fff2c8, #f5b942 72%); color:#5a3b12; font-weight:900; font-size:11px; line-height:1;
+    border-radius:50%; border:1.5px solid #d89a30; box-shadow:0 1px 3px rgba(0,0,0,.45), inset 0 1px 1px rgba(255,255,255,.7); z-index:9; font-variant-numeric:tabular-nums; }
+  #slime.stunned .stunBadge{ display:flex; }
+  /* 회복 직전(카운트 1) — 곧 깨어남 예고 */
+  #slime.stunned.reviving .stunStars{ animation-duration:.7s; }
+  #slime.stunned.reviving .sl-body{ animation:reviveShake .5s ease-in-out infinite; }
+  @keyframes reviveShake{ 0%,100%{transform:scaleY(.66) scaleX(1.2)} 30%{transform:scaleY(.69) scaleX(1.17) translateX(-3%)} 70%{transform:scaleY(.69) scaleX(1.17) translateX(3%)} }
+  #slime.stunned.reviving .stunBadge{ animation:badgePulse .6s ease-in-out infinite; color:#7a3b12; background:radial-gradient(circle at 40% 32%, #fff0c8, #ffb024 72%); }
+  @keyframes badgePulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.16)} }
+
+  .shake{ animation:shake .32s ease; }
+  @keyframes shake{ 0%,100%{transform:translateX(0)} 20%{transform:translateX(-14%)} 40%{transform:translateX(12%)} 60%{transform:translateX(-8%)} 80%{transform:translateX(5%)} }
+  .pop{ animation:pop .3s ease; } @keyframes pop{ 0%{transform:scale(1)} 45%{transform:scale(1.22)} 100%{transform:scale(1)} }
+  .dead{ animation:dead .42s ease forwards; } @keyframes dead{ 0%{transform:scale(1); opacity:1} 60%{transform:scale(1.2); opacity:.6} 100%{transform:scale(.2); opacity:0} }
+  .dmg{ position:absolute; z-index:8; font-weight:800; font-size:14px; pointer-events:none; text-shadow:0 2px 3px #000; animation:rise-fade .7s ease forwards; }
+  .dmg.red{ color:#ff8a98; } .dmg.push{ color:#ffd0a8; }
+  .grab{ position:absolute; z-index:8; font-weight:700; font-size:12px; color:#bff7d2; pointer-events:none; text-shadow:0 2px 3px #000; animation:rise-fade 1s ease forwards; }
+  @keyframes rise-fade{ 0%{transform:translateY(0); opacity:0} 15%{opacity:1} 100%{transform:translateY(-130%); opacity:0} }
+
+  /* log */
+  .log{ background:linear-gradient(180deg,#281d12,#180f08); border:1px solid var(--panel-edge); border-radius:12px; padding:7px 11px; min-height:52px; display:flex; flex-direction:column; justify-content:center; gap:2px; }
+  .log p{ margin:0; font-size:12px; color:var(--muted); line-height:1.45; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
+  .log p.last{ color:var(--ink); font-weight:600; }
+
+  /* controls */
+  .controls{ display:flex; flex-direction:column; gap:8px; padding-top:2px; }
+  .dpad{ display:grid; gap:8px; width:100%; max-width:286px; margin:0 auto;
+    grid-template-columns:repeat(3,1fr); grid-template-areas:"s1 up s2" "lf wt rt" "x1 dn x2"; }
+  .dbtn{ appearance:none; cursor:pointer; touch-action:manipulation; -webkit-user-select:none; user-select:none;
+    border:1px solid var(--panel-edge); border-radius:15px; aspect-ratio:1/.78;
+    display:flex; align-items:center; justify-content:center; font-weight:800; transition:transform .06s, box-shadow .06s; }
+  .dbtn.dir{ font-size:25px; color:#ffe6c8;
+    background:linear-gradient(180deg,#3c2e1e,#241a10); box-shadow:0 5px 0 #140d06, 0 7px 11px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,225,180,.12); }
+  .dbtn.dir:active{ transform:translateY(4px); box-shadow:0 1px 0 #140d06, 0 3px 6px rgba(0,0,0,.3); }
+  .dbtn.dir.blocked{ animation:nudge .3s ease; }
+  @keyframes nudge{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7%)} 50%{transform:translateX(5%)} 75%{transform:translateX(-3%)} }
+  .dbtn[data-dir="up"]{ grid-area:up; } .dbtn[data-dir="down"]{ grid-area:dn; }
+  .dbtn[data-dir="left"]{ grid-area:lf; } .dbtn[data-dir="right"]{ grid-area:rt; }
+  .dbtn.wait{ grid-area:wt; font-size:15px; letter-spacing:.5px; color:#16240f;
+    background:linear-gradient(180deg,#9be87e,#6cc24f); box-shadow:0 5px 0 #3f7d2c, 0 7px 11px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.3); }
+  .dbtn.wait:active{ transform:translateY(4px); box-shadow:0 1px 0 #3f7d2c, 0 3px 6px rgba(0,0,0,.3); }
+  .slot{ grid-area:s1; border-radius:13px; border:1.5px dashed rgba(185,155,115,.22); background:rgba(255,225,180,.02); aspect-ratio:1/.78; }
+  .slot.s2{ grid-area:s2; }
+  .subRow{ display:flex; gap:8px; max-width:286px; margin:0 auto; width:100%; }
+  .subBtn{ flex:1; appearance:none; cursor:pointer; touch-action:manipulation; padding:9px; border-radius:11px; font-size:12.5px; font-weight:600; color:var(--ink);
+    background:linear-gradient(180deg,#2f2417,#1c1409); border:1px solid var(--panel-edge); box-shadow:0 3px 0 #150d06; transition:transform .07s, box-shadow .07s; }
+  .subBtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #150d06; }
+  .hint{ text-align:center; font-size:10.5px; color:var(--faint); line-height:1.4; } .hint span{ color:var(--muted); }
+
+  /* overlay / result */
+  #overlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(8,10,16,.74); backdrop-filter:blur(3px); z-index:20; padding:24px; }
+  #overlay.on{ display:flex; }
+  .panel{ width:100%; max-width:310px; text-align:center; background:linear-gradient(180deg,#2a2016,#19110a); border:1px solid var(--panel-edge); border-radius:20px; padding:24px 22px; box-shadow:0 20px 50px rgba(0,0,0,.5); }
+  .resultLeaf{ width:60px; height:60px; margin:0 auto 6px; position:relative; }
+  .resultLeaf .rl{ position:absolute; left:24%; top:18%; width:52%; height:60%; border-radius:0 75% 0 75%; transform:rotate(38deg); background:linear-gradient(150deg,#c7f7d8,#7fe6a0 50%,#3fb873); box-shadow:0 4px 10px rgba(0,0,0,.4); }
+  .resultLeaf.fail .rl{ background:linear-gradient(150deg,#7e8796,#565d72); filter:grayscale(.6); transform:rotate(38deg) skewX(-8deg); }
+  .resultLeaf .glowring{ position:absolute; inset:0; border-radius:50%; }
+  .resultLeaf.qa .glowring{ box-shadow:0 0 26px 6px rgba(255,213,107,.6); }
+  .resultLeaf.perfect .glowring{ box-shadow:0 0 30px 8px rgba(140,240,170,.7), 0 0 60px 14px rgba(255,225,130,.35); animation:perfGlow 1.8s ease-in-out infinite; }
+  @keyframes perfGlow{ 0%,100%{opacity:.7} 50%{opacity:1} }
+  .resultLeaf.perfect::before, .resultLeaf.perfect::after{ content:""; position:absolute; width:9px; height:9px; background:
+      linear-gradient(#fff,#fff) center/100% 24% no-repeat, linear-gradient(#fff,#fff) center/24% 100% no-repeat;
+      filter:drop-shadow(0 0 4px #d8ffe6); animation:tw 1.6s ease-in-out infinite; }
+  .resultLeaf.perfect::before{ left:2px; top:6px; } .resultLeaf.perfect::after{ right:0; top:30px; animation-delay:.8s; }
+  .panel h2{ margin:8px 0 4px; font-size:22px; }
+  .panel .lead{ margin:0 0 14px; color:var(--muted); font-size:13px; }
+  .qbig{ font-size:46px; font-weight:900; line-height:1; margin:2px 0 4px; }
+  .qbig.qa{ color:var(--qa); text-shadow:0 0 18px rgba(255,213,107,.5); } .qbig.qb{ color:var(--qb); } .qbig.qc{ color:var(--qc); }
+  .qcap{ font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .stats{ text-align:left; background:#170f07; border:1px solid var(--panel-edge); border-radius:12px; padding:10px 14px; margin-bottom:16px; }
+  .stats div{ display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:var(--muted); }
+  .stats div b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .panel .pbtns{ display:flex; flex-direction:column; gap:9px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .actor.move-anim{ transition:none; }
+    .rise,.sl-body,.mk .movedot,.mk.atk .ring,.leafArt .halo,.leafArt .lift,.leafArt .sp,.crest .spark,.exitArt .lantern,#board.has-leaf .exitArt{ animation:none; }
+    #slime.stunned .stunStars, #slime.stunned .sl-body, #slime.awake .sl-body,
+    #slime.stunned.reviving .sl-body, #slime.stunned.reviving .stunBadge, #slime.stunned.reviving .stunStars{ animation:none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== TITLE ===== -->
+  <section id="title">
+    <div class="crest"><div class="jar"></div><div class="spark s1"></div><div class="spark s2"></div><div class="spark s3"></div></div>
+    <h1>미궁 포션 가게</h1>
+    <p class="sub"><b>반짝잎</b>을 채집하고,<br>슬라임을 피해 <b>출구</b>로 돌아오세요.</p>
+    <div class="sizes" id="sizes"></div>
+  </section>
+
+  <!-- ===== GAME ===== -->
+  <section id="game">
+    <div class="hud">
+      <div class="row">
+        <span class="stage-name" id="stageName">8×10 표준판</span>
+        <span class="turn">턴 <b id="turnNum">0</b></span>
+      </div>
+      <div class="row">
+        <div class="hpwrap">
+          <div class="hpbar"><div class="hpfill" id="hpFill"></div></div>
+          <span class="hpnum">HP <span class="hh" id="hpNow">10</span> / <span id="hpMax">10</span></span>
+        </div>
+        <span class="qpill qa" id="qPill">품질 A</span>
+      </div>
+      <div class="goalRow">
+        <span class="gi" id="goalIcon"><span class="leafmini"></span></span>
+        <span id="goalState">목표: 반짝잎 채집</span>
+      </div>
+    </div>
+
+    <div id="boardWrap">
+      <div id="frame">
+        <span class="stud tl"></span><span class="stud tr"></span><span class="stud bl"></span><span class="stud br"></span>
+        <div id="board">
+          <div id="markers"></div>
+          <div id="leaf"><div class="leafArt">
+            <div class="halo"></div>
+            <div class="lift">
+              <div class="leaf1"></div><div class="leaf2"></div>
+              <span class="sp a"></span><span class="sp b"></span><span class="sp c"></span>
+            </div>
+          </div></div>
+          <div class="actor" id="slime">
+            <div class="inner"><div class="fig">
+              <div class="gshadow"></div>
+              <div class="sl-body"><div class="sl-eye l"></div><div class="sl-eye r"></div><div class="sl-mouth"></div></div>
+              <div class="alertRing"></div>
+              <div class="zzz"><span>z</span><span>z</span><span>z</span></div>
+              <div class="stunStars"><span></span><span></span><span></span></div>
+              <div class="stunBadge">4</div>
+            </div></div>
+          </div>
+          <div class="actor" id="player">
+            <div class="glow"></div>
+            <div class="inner"><div class="fig">
+              <div class="gshadow"></div>
+              <div class="rise">
+                <div class="pl-cape"></div><div class="pl-pack"></div>
+                <div class="pl-arm l"></div><div class="pl-arm r"></div>
+                <div class="pl-body"></div><div class="pl-apron"></div><div class="pl-potion"></div>
+                <div class="pl-head"></div><div class="pl-face"></div><div class="pl-hat"></div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log" id="log"><p>　</p><p>　</p><p class="last">　</p></div>
+
+    <div class="controls">
+      <div class="dpad">
+        <span class="slot s1" aria-hidden="true"></span>
+        <button class="dbtn dir" data-dir="up" aria-label="위로 이동">▲</button>
+        <span class="slot s2" aria-hidden="true"></span>
+        <button class="dbtn dir" data-dir="left" aria-label="왼쪽 이동">◀</button>
+        <button class="dbtn wait" id="waitBtn" aria-label="대기 · 턴 종료">대기</button>
+        <button class="dbtn dir" data-dir="right" aria-label="오른쪽 이동">▶</button>
+        <button class="dbtn dir" data-dir="down" aria-label="아래로 이동">▼</button>
+      </div>
+      <div class="subRow">
+        <button class="subBtn" id="restartBtn">재시작</button>
+        <button class="subBtn" id="homeBtn">처음으로</button>
+      </div>
+      <div class="hint">방향 패드 = <span>이동·채집·밀치기·귀환</span> · 막힌 방향은 턴이 지나지 않아</div>
+    </div>
+
+    <div id="overlay">
+      <div class="panel">
+        <div class="resultLeaf" id="resLeaf"><div class="glowring"></div><div class="rl"></div></div>
+        <h2 id="ovTitle">채집 성공!</h2>
+        <p class="lead" id="ovLead">반짝잎을 품에 안고 가게로 돌아왔다.</p>
+        <div class="qbig qa" id="qBig">A</div>
+        <div class="qcap" id="qCap">반짝잎 품질</div>
+        <div class="stats" id="stats"></div>
+        <div class="pbtns">
+          <button class="waitBtn" id="ovRetry">한 번 더</button>
+          <button class="subBtn" id="ovHome">다른 판 고르기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- stages: '.' floor 'O' rock  P start  E slime  L leaf  S exit(가게문) ---------- */
+const STAGES = {
+  "7x9": {
+    cols:7, rows:9, name:"7×9 튜토리얼판", tag:"조작·규칙 익히는 도입판", ambush:false,
+    map:[ ".......",".PS....",".......","...O...","..O.E..",".......","....O..",".....L.","......." ]
+  },
+  "8x10": {
+    cols:8, rows:10, name:"8×10 표준판", tag:"잠복 슬라임 · 조용한 길 찾기", ambush:true,
+    map:[ "........",".PS.....","........","..O.....","....E...","........","..O...O.","........",".....L..","........" ]
+  }
+};
+
+let S=null, tile=44, busy=false, logLines=[];
+const $ = id => document.getElementById(id);
+const boardEl=$("board"), markersEl=$("markers"), playerEl=$("player"), slimeEl=$("slime"), leafEl=$("leaf");
+
+(function(){
+  const wrap=$("sizes");
+  for(const key of ["7x9","8x10"]){
+    const st=STAGES[key];
+    const b=document.createElement("button"); b.className="sizeBtn";
+    b.innerHTML='<span class="big">'+st.name+'</span><span class="tag">'+st.tag+'</span>';
+    b.addEventListener("click", ()=>startStage(key));
+    wrap.appendChild(b);
+  }
+})();
+
+function parseStage(def){
+  const terrain=[]; let player=null, slime=null, leaf=null, exit=null;
+  for(let r=0;r<def.rows;r++){
+    const line=def.map[r], row=[];
+    for(let c=0;c<def.cols;c++){
+      const ch=line[c];
+      if(ch==="O") row.push("rock");
+      else if(ch==="S"){ row.push("exit"); exit={c,r}; }
+      else { row.push("floor"); if(ch==="P") player={c,r}; if(ch==="E") slime={c,r}; if(ch==="L") leaf={c,r}; }
+    }
+    terrain.push(row);
+  }
+  return {cols:def.cols, rows:def.rows, name:def.name, ambush:!!def.ambush, terrain, player, slime, leaf, exit};
+}
+
+function startStage(key){
+  const p=parseStage(STAGES[key]);
+  S={ cols:p.cols, rows:p.rows, name:p.name, terrain:p.terrain, exit:p.exit, ambush:p.ambush,
+      player:{c:p.player.c,r:p.player.r,hp:10,maxhp:10,dir:"down"},
+      slime:{c:p.slime.c,r:p.slime.r,hp:3,alive:true, ambush:p.ambush, state:(p.ambush?"asleep":"awake"), woke:false, stirred:false, stunned:false, stunTimer:0, justStunned:false},
+      leaf:{c:p.leaf.c,r:p.leaf.r,collected:false},
+      hasLeaf:false, hits:0, turn:0, status:"play", everWoke:false, everStunned:false };
+  busy=false; logLines=[];
+  $("game").classList.add("on"); $("title").style.display="none"; $("overlay").classList.remove("on");
+  slimeEl.style.display=""; slimeEl.querySelector(".fig").classList.remove("dead");
+  slimeEl.classList.remove("sleeping","stirring","awake","woke-flash","stunned","reviving");
+  if(S.slime.state==="asleep") slimeEl.classList.add("sleeping"); else slimeEl.classList.add("awake");
+  leafEl.style.display=""; boardEl.classList.remove("has-leaf");
+
+  buildBoard();
+  $("stageName").textContent=(S.cols===8?"1층 · ":"")+S.name;
+  updateGoal(); updateQuality();
+  pushLog("탐험가가 미궁에 들어섰다.");
+  if(S.slime.state==="asleep"){ pushLog("구석에 슬라임이 곤히 잠들어 있다…"); pushLog("깨우지 않고 지나갈 길이 있을까?"); }
+  else pushLog("반짝잎을 찾아 채집하자.");
+  layout(); syncHud(); renderActors(true); renderLeaf(); renderMarkers();
+}
+
+function buildBoard(){
+  [...boardEl.querySelectorAll(".cell")].forEach(n=>n.remove());
+  boardEl.style.gridTemplateColumns=`repeat(${S.cols}, var(--tile))`;
+  const frag=document.createDocumentFragment();
+  for(let r=0;r<S.rows;r++){
+    for(let c=0;c<S.cols;c++){
+      const t=S.terrain[r][c], alt=((c+r)%2)?" alt":"";
+      const cell=document.createElement("div");
+      if(t==="exit"){ cell.className="cell floor"+alt; cell.innerHTML='<div class="exitArt"><span class="lantern"></span><span class="knob"></span></div><div class="exitLbl">출구</div>'; }
+      else if(t==="rock"){ cell.className="cell floor"+alt;
+        const rv=((c*3+r*7)%3), rc=(rv===1?" r2":rv===2?" r3":"");
+        cell.innerHTML='<div class="rockArt'+rc+'"></div>'; }
+      else { cell.className="cell floor"+alt; }
+      cell.dataset.c=c; cell.dataset.r=r;
+      frag.appendChild(cell);
+    }
+  }
+  boardEl.insertBefore(frag, markersEl);
+}
+
+boardEl.addEventListener("click", e=>{
+  if(busy||!S||S.status!=="play") return;
+  const cell=e.target.closest(".cell"); if(!cell) return;
+  onTap(+cell.dataset.c, +cell.dataset.r);
+});
+
+function onTap(c,r){
+  const p=S.player;
+  if(Math.abs(c-p.c)+Math.abs(r-p.r)!==1) return;
+  if(S.terrain[r][c]==="rock") return;
+  if(S.slime.alive && S.slime.c===c && S.slime.r===r){
+    if(S.slime.stunned){ pushLog("기절한 슬라임이 길을 막고 있다."); return; }
+    playerPush(); return;
+  }
+  playerMove(c,r);
+}
+
+async function playerMove(c,r){
+  busy=true;
+  const dc=c-S.player.c, dr=r-S.player.r;
+  S.player.dir = dr<0?"up":dr>0?"down":dc<0?"left":"right";
+  S.player.c=c; S.player.r=r;
+  renderActors(); renderMarkers();
+  // pick up leaf?
+  let collectedNow=false;
+  if(!S.leaf.collected && c===S.leaf.c && r===S.leaf.r){ collectLeaf(); collectedNow=true; }
+  else pushLog("탐험가가 한 칸 옮겼다.");
+  checkAmbush();
+  await wait(160);
+  // reached exit?
+  if(S.terrain[r][c]==="exit"){
+    if(S.hasLeaf){ endGame(true); return; }
+    pushLog("아직 재료를 찾지 못했다.");
+    pushLog("반짝잎을 챙겨야 돌아갈 수 있다.");
+  }
+  await enemyTurn(); finishTurn();
+}
+
+function collectLeaf(){
+  S.leaf.collected=true; S.hasLeaf=true;
+  leafEl.style.display="none";
+  boardEl.classList.add("has-leaf");
+  grabFx(S.leaf.c, S.leaf.r);
+  updateGoal();
+  pushLog("반짝잎을 조심히 채집했다.");
+  pushLog("이제 가게로 돌아가자.");
+}
+
+/* 잠복 슬라임(02B): 2칸 이내 접근에만 깨어남. 잎 채집 자체로는 깨우지 않음
+   → 2칸 감지 밖으로 조용히 채집·귀환하면 안 깨우고 A. 직전엔 3칸에서 '꿈틀…' 경고. */
+function mdToSlime(){ return Math.abs(S.slime.c-S.player.c)+Math.abs(S.slime.r-S.player.r); }
+function checkAmbush(){
+  const sl=S.slime;
+  if(!sl.alive || !sl.ambush || sl.state==="awake") return;
+  const d=mdToSlime();
+  if(d<=2){ wakeSlime(S.hasLeaf?"leaf":"near"); return; }   // 잎을 든 채 근접 = 향기로, 아니면 인기척으로
+  if(d<=3){
+    if(!sl.stirred){ sl.stirred=true; slimeEl.classList.add("stirring"); pushLog("슬라임이 꿈틀거린다…"); }
+  } else {
+    if(sl.stirred){ sl.stirred=false; slimeEl.classList.remove("stirring"); }
+  }
+}
+function wakeSlime(reason){
+  const sl=S.slime;
+  sl.state="awake"; sl.woke=true; sl.stirred=false;   // woke=true → 이 턴엔 움직임/공격 없음
+  S.everWoke=true;
+  slimeEl.classList.remove("sleeping","stirring");
+  slimeEl.classList.add("awake","woke-flash");
+  setTimeout(()=>slimeEl.classList.remove("woke-flash"), 520);
+  wakeFx(sl.c, sl.r);
+  pushLog( reason==="leaf" ? "반짝잎 향기에 슬라임이 깨어났다!"
+         : reason==="push" ? "잠든 슬라임을 밀쳐 깨워버렸다!"
+         : "인기척에 슬라임이 깨어났다!" );
+  renderMarkers();
+}
+
+/* 밀치기 — 일부러 손해보는 수: 슬라임 HP를 깎지만, 살아있으면 그 턴에 반격(품질↓).
+   HP 0이 되면 죽지 않고 '기절' — 칸을 계속 막은 채 4턴 뒤 다시 깨어난다. */
+async function playerPush(){
+  busy=true; const sl=S.slime;
+  const dc=sl.c-S.player.c, dr=sl.r-S.player.r;
+  S.player.dir = dr<0?"up":dr>0?"down":dc<0?"left":"right";
+  renderActors();
+  bump(slimeEl); pushFx(sl.c, sl.r);
+  sl.hp -= 1;
+  if(sl.hp<=0){
+    sl.stunned=true; sl.stunTimer=4; sl.justStunned=true; sl.stirred=false; S.everStunned=true;
+    slimeEl.classList.remove("awake");
+    setStunVisual(true); updateStunBadge();
+    pushLog("슬라임을 말랑하게 밀쳐냈다!");
+    pushLog("슬라임이 납작하게 기절했다. (4턴 뒤 회복)");
+    renderActors(); renderMarkers();
+    await wait(240);
+    await enemyTurn(); finishTurn(); return;
+  }
+  if(sl.ambush && sl.state!=="awake"){ wakeSlime("push"); }   // 자던 애를 밀면 깨어남(이 턴 반격 없음)
+  else pushLog("슬라임을 말랑하게 밀쳐냈다. (재료엔 도움이 안 돼)");
+  await wait(200);
+  await enemyTurn(); finishTurn();
+}
+
+async function endTurn(){
+  if(busy||!S||S.status!=="play") return;
+  busy=true; pushLog("탐험가는 숨을 죽이고 기다렸다.");
+  await enemyTurn(); finishTurn();
+}
+
+async function enemyTurn(){
+  const sl=S.slime, p=S.player; if(!sl.alive) return;
+  if(sl.stunned){
+    if(sl.justStunned){ sl.justStunned=false; await wait(120); return; }   // 막 기절한 턴 — 카운트 그대로
+    sl.stunTimer--; updateStunBadge();
+    if(sl.stunTimer<=0){
+      sl.stunned=false; sl.state="awake"; sl.woke=false; sl.stirred=false;
+      setStunVisual(false); slimeEl.classList.add("awake"); bump(slimeEl);
+      pushLog("슬라임이 다시 통통 튀어 올랐다!");
+      renderActors(); renderMarkers();
+      await wait(280); return;                  // 회복한 턴엔 행동 없음 — 다음 적 턴부터 추격
+    }
+    if(sl.stunTimer===1) slimeEl.classList.add("reviving");   // 곧 깨어남 예고
+    pushLog("기절한 슬라임이 꿈틀거린다… "+sl.stunTimer+"턴 뒤 회복");
+    await wait(140); return;
+  }
+  if(sl.state==="asleep") return;                 // 자는 중 — 움직이지 않음
+  if(sl.woke){ sl.woke=false; await wait(120); return; }  // 막 깨어난 턴 — 공격/이동 없음
+  if(Math.abs(sl.c-p.c)+Math.abs(sl.r-p.r)===1){
+    bump(slimeEl); shake(playerEl); hitFx(p.c, p.r);
+    p.hp=Math.max(0,p.hp-1); S.hits++;
+    const before=quality(); 
+    pushLog("슬라임이 몸을 부딪쳤다! HP -1");
+    syncHud(); updateQuality();
+    if(quality()!==before || S.hits===1) pushLog("반짝잎 품질이 흔들린다…");
+    await wait(300);
+    if(p.hp<=0) endGame(false);
+    return;
+  }
+  const step=bfsStep({c:sl.c,r:sl.r},{c:p.c,r:p.r});
+  if(step){ sl.c=step.c; sl.r=step.r; pushLog("슬라임이 스멀스멀 다가온다."); renderActors(); await wait(170); }
+  else{ pushLog("슬라임이 길을 잃고 두리번거린다."); await wait(120); }
+}
+
+function finishTurn(){ if(S.status!=="play") return; S.turn++; syncHud(); renderMarkers(); busy=false; }
+
+/* pathfinding on playable cells */
+function slimeWalkable(c,r){
+  if(c<0||r<0||c>=S.cols||r>=S.rows) return false;
+  const t=S.terrain[r][c];
+  if(t==="rock"||t==="exit") return false;
+  if(c===S.player.c && r===S.player.r) return false;
+  if(S.slime.alive && S.slime.stunned && S.slime.c===c && S.slime.r===r) return false;  // 기절 슬라임 칸 = 장애물
+  return true;
+}
+function bfsStep(start, goal){
+  const key=(c,r)=>c+","+r, prev={}; prev[key(start.c,start.r)]=null;
+  const q=[[start.c,start.r]], dirs=[[0,-1],[0,1],[-1,0],[1,0]]; let found=false;
+  while(q.length){
+    const [c,r]=q.shift();
+    if(c===goal.c&&r===goal.r){ found=true; break; }
+    for(const [dc,dr] of dirs){
+      const nc=c+dc, nr=r+dr, k=key(nc,nr);
+      if(k in prev) continue;
+      const isGoal=(nc===goal.c&&nr===goal.r);
+      if(!isGoal && !slimeWalkable(nc,nr)) continue;
+      prev[k]=key(c,r); q.push([nc,nr]);
+    }
+  }
+  if(!found) return null;
+  const path=[]; let node=key(goal.c,goal.r);
+  while(node!=null){ path.push(node); node=prev[node]; }
+  path.reverse();
+  if(path.length<2) return null;
+  const [fc,fr]=path[1].split(",").map(Number);
+  return {c:fc,r:fr};
+}
+
+/* rendering */
+function place(el,c,r){ el.style.transform=`translate(${c*tile}px, ${r*tile}px)`; }
+function renderActors(snap){
+  playerEl.classList.toggle("move-anim", !snap);
+  slimeEl.classList.toggle("move-anim", !snap);
+  playerEl.classList.remove("face-up","face-down","face-left","face-right");
+  playerEl.classList.add("face-"+((S.player&&S.player.dir)||"down"));
+  place(playerEl, S.player.c, S.player.r);
+  if(S.slime.alive) place(slimeEl, S.slime.c, S.slime.r);
+}
+function renderLeaf(){ if(!S.leaf.collected) place(leafEl, S.leaf.c, S.leaf.r); }
+function renderMarkers(){
+  markersEl.innerHTML=""; if(S.status!=="play") return;
+  const p=S.player, dirs=[[0,-1],[0,1],[-1,0],[1,0]];
+  for(const [dc,dr] of dirs){
+    const c=p.c+dc, r=p.r+dr;
+    if(c<0||r<0||c>=S.cols||r>=S.rows) continue;
+    if(S.terrain[r][c]==="rock") continue;
+    const slimeHere=S.slime.alive && S.slime.c===c && S.slime.r===r;
+    const pushable=slimeHere && S.slime.state==="awake" && !S.slime.stunned;
+    const mk=document.createElement("div");
+    mk.className="mk"+(pushable?" atk":"");
+    mk.style.transform=`translate(${c*tile}px, ${r*tile}px)`;
+    mk.innerHTML = slimeHere ? (pushable?'<div class="ring"></div>':'') : '<div class="movedot"></div>';
+    if(slimeHere && !pushable) continue; // 자는 슬라임 칸엔 표식 없음
+    markersEl.appendChild(mk);
+  }
+}
+
+/* fx */
+function bump(el){ const i=el.querySelector(".inner"); i.classList.remove("pop"); void i.offsetWidth; i.classList.add("pop"); }
+function shake(el){ const i=el.querySelector(".inner"); i.classList.remove("shake"); void i.offsetWidth; i.classList.add("shake"); }
+function setStunVisual(on){ slimeEl.classList.toggle("stunned", on); if(!on) slimeEl.classList.remove("reviving"); }
+function updateStunBadge(){ const b=slimeEl.querySelector(".stunBadge"); if(b) b.textContent=Math.max(0,S.slime.stunTimer); }
+function floatTxt(c,r,cls,txt){ const d=document.createElement("div"); d.className=cls; d.textContent=txt; d.style.left=(c*tile+tile*0.30)+"px"; d.style.top=(r*tile-tile*0.05)+"px"; boardEl.appendChild(d); setTimeout(()=>d.remove(),1000); }
+function hitFx(c,r){ floatTxt(c,r,"dmg red","-1"); }
+function wakeFx(c,r){ floatTxt(c,r,"wake","!"); }
+function pushFx(c,r){ floatTxt(c,r,"dmg push","밀치기"); }
+function grabFx(c,r){ floatTxt(c,r,"grab","반짝잎 +1"); }
+
+/* hud + quality */
+function quality(){ return S.hits===0?"A":S.hits===1?"B":"C"; }
+function updateQuality(){
+  const q=quality(), pill=$("qPill");
+  pill.textContent="품질 "+q;
+  pill.className="qpill q"+q.toLowerCase();
+}
+function updateGoal(){
+  $("goalState").textContent = S.hasLeaf ? "목표: 출구로 귀환" : "목표: 반짝잎 채집";
+  $("goalIcon").classList.toggle("collected", S.hasLeaf);
+}
+function syncHud(){ $("turnNum").textContent=S.turn; $("hpNow").textContent=S.player.hp; $("hpMax").textContent=S.player.maxhp; $("hpFill").style.width=(100*S.player.hp/S.player.maxhp)+"%"; }
+function pushLog(text){
+  logLines.push(text); if(logLines.length>3) logLines=logLines.slice(-3);
+  const ps=$("log").querySelectorAll("p"), shown=logLines.slice(-3);
+  while(shown.length<3) shown.unshift("　");
+  ps.forEach((p,i)=>{ p.textContent=shown[i]; p.classList.toggle("last", i===2); });
+}
+
+/* end + result panel */
+function endGame(win){
+  S.status=win?"clear":"fail"; busy=true; renderMarkers();
+  pushLog(win?"반짝잎을 품에 안고 가게로 돌아왔다!":"반짝잎을 지키지 못하고 쓰러졌다…");
+  syncHud();
+  const q=quality();
+  setTimeout(()=>{
+    const perfect = win && S.ambush && !S.everWoke;   // 잠복 슬라임을 한 번도 깨우지 않고 클리어
+    const rl=$("resLeaf");
+    rl.className="resultLeaf"+(win?(" q"+q.toLowerCase()):" fail")+(perfect?" perfect":"");
+    $("ovTitle").textContent = !win ? "채집 실패" : perfect ? "완벽 회피!" : "채집 성공!";
+    $("ovLead").textContent  = !win ? "반짝잎을 지키지 못했다."
+                              : perfect ? "슬라임을 깨우지 않고 반짝잎을 가져왔다."
+                              : "반짝잎을 무사히 가게로 가져왔다.";
+    const qb=$("qBig"); qb.textContent=q; qb.className="qbig q"+q.toLowerCase();
+    $("qBig").style.display = win ? "" : "none";
+    $("qCap").style.display = win ? "" : "none";
+    $("qCap").textContent = perfect ? "반짝잎 품질 A · 향이 그대로 살아 있다"
+                          : q==="A" ? "반짝잎 품질 · 깨끗하게 가져왔다"
+                          : q==="B" ? "반짝잎 품질 · 살짝 스쳤다"
+                          : "반짝잎 품질 · 많이 시달렸다";
+    const slimeStat = S.everStunned ? "밀쳐 재움"
+                    : S.ambush ? (S.everWoke ? "깨움" : "안 깨움")
+                    : "피해서 통과";
+    $("stats").innerHTML =
+      '<div><span>보드</span><b>'+S.name+'</b></div>'+
+      '<div><span>걸린 턴</span><b>'+S.turn+'</b></div>'+
+      '<div><span>슬라임</span><b>'+slimeStat+'</b></div>'+
+      '<div><span>피격</span><b>'+S.hits+'회</b></div>'+
+      '<div><span>남은 HP</span><b>'+S.player.hp+' / '+S.player.maxhp+'</b></div>'+
+      (win?('<div><span>재료 품질</span><b>'+q+'</b></div>'):'');
+    $("overlay").classList.add("on");
+  }, win?280:360);
+}
+
+/* layout (decorative frame padding excluded from grid) */
+const FRAME_PAD=13;
+function layout(){
+  if(!S) return;
+  const wrap=$("boardWrap");
+  const availW=wrap.clientWidth  - FRAME_PAD*2 - 8;
+  const availH=wrap.clientHeight - FRAME_PAD*2 - 8;
+  let t=Math.floor(Math.min(availW/S.cols, availH/S.rows));
+  t=Math.max(34, Math.min(58, t));
+  tile=t; document.documentElement.style.setProperty("--tile", t+"px");
+  boardEl.style.width=(t*S.cols)+"px"; boardEl.style.height=(t*S.rows)+"px";
+  renderActors(true); renderLeaf(); renderMarkers();
+}
+let rTO;
+window.addEventListener("resize", ()=>{ clearTimeout(rTO); rTO=setTimeout(layout,90); });
+window.addEventListener("orientationchange", ()=> setTimeout(layout,250));
+
+/* controls */
+$("waitBtn").addEventListener("click", endTurn);
+$("restartBtn").addEventListener("click", ()=>{ const k=keyFromCols(); if(k) startStage(k); });
+$("homeBtn").addEventListener("click", goHome);
+$("ovRetry").addEventListener("click", ()=>{ const k=keyFromCols(); if(k) startStage(k); });
+$("ovHome").addEventListener("click", goHome);
+
+/* ===== 하단 4방향 패드 (기본 조작) ===== */
+function dirDelta(d){ return d==="up"?[0,-1]:d==="down"?[0,1]:d==="left"?[-1,0]:[1,0]; }
+function tryMove(dir){
+  if(busy||!S||S.status!=="play") return;
+  const p=S.player, d=dirDelta(dir), nc=p.c+d[0], nr=p.r+d[1];
+  if(nc<0||nr<0||nc>=S.cols||nr>=S.rows){ blockedDir(dir); pushLog("그쪽은 미궁의 벽이다."); return; }      // 턴 소비 안 함
+  if(S.terrain[nr][nc]==="rock"){ blockedDir(dir); pushLog("바위가 막고 있어 갈 수 없다."); return; }         // 턴 소비 안 함
+  if(S.slime.alive && S.slime.c===nc && S.slime.r===nr){
+    if(S.slime.stunned){ blockedDir(dir); pushLog("기절한 슬라임이 길을 막고 있다."); return; }              // 턴 소비 안 함
+    S.player.dir=dir; playerPush(); return;                                                                  // 밀치기
+  }
+  playerMove(nc,nr);                                                                                         // 이동/채집/귀환
+}
+function blockedDir(dir){ const b=document.querySelector('.dbtn[data-dir="'+dir+'"]'); if(!b) return;
+  b.classList.remove("blocked"); void b.offsetWidth; b.classList.add("blocked"); }
+[...document.querySelectorAll('.dbtn[data-dir]')].forEach(b=> b.addEventListener("click", ()=>tryMove(b.dataset.dir)));
+window.addEventListener("keydown", e=>{
+  const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};
+  if(m[e.key]){ e.preventDefault(); tryMove(m[e.key]); }
+  else if(e.key===" "){ e.preventDefault(); endTurn(); }
+});
+function keyFromCols(){ return S? S.cols+"x"+S.rows : null; }
+function goHome(){ $("overlay").classList.remove("on"); $("game").classList.remove("on"); $("title").style.display=""; S=null; busy=false; }
+
+function wait(ms){ return new Promise(res=>setTimeout(res,ms)); }
+</script>
+</body>
+</html>
